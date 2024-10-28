@@ -1,7 +1,15 @@
+using GamingPlatform.Hubs;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using GamingPlatform.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<GamingPlatformContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("GamingPlatformContext") ?? throw new InvalidOperationException("Connection string 'GamingPlatformContext' not found.")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -23,5 +31,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();

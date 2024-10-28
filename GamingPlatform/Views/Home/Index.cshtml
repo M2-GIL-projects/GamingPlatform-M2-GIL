@@ -1,8 +1,93 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "GamingPlatform";
 }
-
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Background Shape -->
+<div class="position-absolute top-0 start-50 translate-middle-x w-75" style="height: 300px; background: linear-gradient(to top right, #e3342f, #3490dc); opacity: 0.3; clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%);">
 </div>
+
+<div class="container text-center py-5">
+    <h1 class="display-4 fw-bold text-dark">Des jeux pour enrichir votre expérience en ligne</h1>
+    <p class="lead text-muted mt-3">Plongez dans l'univers captivant des jeux de société depuis le confort de votre foyer. GamingPlatform vous offre une expérience unique où vous pouvez vous connecter avec des joueurs du monde entier et découvrir une vaste sélection de jeux palpitants.</p>
+
+    <div class="mt-4">
+        <a href="/signalR" class="btn btn-primary btn-lg text-white">Créer un lobby</a>
+    </div>
+</div>
+
+<!-- Bottom Shape -->
+<div class="position-absolute bottom-0 start-50 translate-middle-x w-75" style="height: 300px; background: linear-gradient(to top right, #3490dc, #e3342f); opacity: 0.3; clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%);">
+</div>
+
+<!-- Game Collection Section -->
+<div class="bg-light py-5">
+    <div class="container text-center mb-5">
+        <h2 class="display-5 fw-bold">Découvrez notre collection de jeux</h2>
+        <p class="lead text-muted mt-2">Du classique au moderne, nous avons rassemblé une variété de jeux de société pour satisfaire tous les goûts.</p>
+    </div>
+
+    <div class="container">
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            <!-- Speed Typing -->
+            <div class="col">
+                <div class="card h-100">
+                    <img src="speed-typing.jpg" class="card-img-top" alt="Speed Typing">
+                    <div class="card-body">
+                        <h5 class="card-title">Speed Typing</h5>
+                        <p class="card-text">Affrontez au moins 2 joueurs dans une course de dactylographie en temps réel. Suivez l'avancée des autres joueurs en direct !</p>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <!-- Morpion -->
+            <div class="col">
+                <div class="card h-100">
+                    <img src="morpion.jpg" class="card-img-top" alt="Morpion">
+                    <div class="card-body">
+                        <h5 class="card-title">Morpion</h5>
+                        <p class="card-text">Un jeu classique pour 2 joueurs. Marquez trois symboles consécutifs pour gagner !</p>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bataille Navale -->
+            <div class="col">
+                <div class="card h-100">
+                    <img src="bataille-navale.jpg" class="card-img-top" alt="Bataille Navale">
+                    <div class="card-body">
+                        <h5 class="card-title">Bataille Navale</h5>
+                        <p class="card-text">Affrontez un adversaire dans ce jeu stratégique à 2 joueurs. Trouvez et coulez les navires de votre ennemi avant qu'il ne coule les vôtres.</p>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <!-- Petit Bac -->
+            <div class="col">
+                <div class="card h-100">
+                    <img src="petit-bac.jpg" class="card-img-top" alt="Petit Bac">
+                    <div class="card-body">
+                        <h5 class="card-title">Petit Bac</h5>
+                        <p class="card-text">Un jeu de lettres et de rapidité pour 2 joueurs ou plus. Le host du lobby valide les réponses en fin de partie.</p>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course de Labyrinthe -->
+            <div class="col">
+                <div class="card h-100">
+                    <img src="labyrinthe.jpg" class="card-img-top" alt="Course de Labyrinthe">
+                    <div class="card-body">
+                        <h5 class="card-title">Course de Labyrinthe</h5>
+                        <p class="card-text">Un labyrinthe généré aléatoirement pour une course à sortir avant les autres. Affrontez 2 joueurs ou plus dans cette aventure !</p>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
