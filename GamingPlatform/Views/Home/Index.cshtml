@@ -1,93 +1,125 @@
 ﻿@{
-    ViewData["Title"] = "GamingPlatform";
+    ViewData["Title"] = "Accueil - JeuxHub";
 }
-<!-- Background Shape -->
-<div class="position-absolute top-0 start-50 translate-middle-x w-75" style="height: 300px; background: linear-gradient(to top right, #e3342f, #3490dc); opacity: 0.3; clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%);">
-</div>
 
-<div class="container text-center py-5">
-    <h1 class="display-4 fw-bold text-dark">Des jeux pour enrichir votre expérience en ligne</h1>
-    <p class="lead text-muted mt-3">Plongez dans l'univers captivant des jeux de société depuis le confort de votre foyer. GamingPlatform vous offre une expérience unique où vous pouvez vous connecter avec des joueurs du monde entier et découvrir une vaste sélection de jeux palpitants.</p>
-
-    <div class="mt-4">
-        <a href="/signalR" class="btn btn-primary btn-lg text-white">Créer un lobby</a>
+<div id="mainCarousel" class="carousel slide" data-ride="carousel">
+    <ol class="carousel-indicators">
+        <li data-target="#mainCarousel" data-slide-to="0" class="active"></li>
+        <li data-target="#mainCarousel" data-slide-to="1"></li>
+        <li data-target="#mainCarousel" data-slide-to="2"></li>
+    </ol>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <img src="https://picsum.photos/1200/400?random=1" class="d-block w-100 carousel-img" alt="Jeux en ligne">
+            <div class="carousel-caption d-none d-md-block">
+                <h2>Bienvenue sur JeuxHub</h2>
+                <p>Votre nouvelle plateforme de jeux en ligne sans inscription</p>
+                <a href="#games" class="btn btn-primary btn-lg">Découvrir nos jeux</a>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="https://picsum.photos/1200/400?random=2" class="d-block w-100 carousel-img" alt="Multijoueur">
+            <div class="carousel-caption d-none d-md-block">
+                <h2>Jouez avec vos amis</h2>
+                <p>Créez ou rejoignez un lobby pour commencer à jouer</p>
+                <a href="#" class="btn btn-primary btn-lg">Voir les lobbys</a>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <img src="https://picsum.photos/1200/400?random=3" class="d-block w-100 carousel-img" alt="Compétition">
+            <div class="carousel-caption d-none d-md-block">
+                <h2>Compétition et classements</h2>
+                <p>Consultez les meilleurs scores et relevez des défis</p>
+                <a href="#" class="btn btn-primary btn-lg">Voir les classements</a>
+            </div>
+        </div>
     </div>
+    <a class="carousel-control-prev" href="#mainCarousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Précédent</span>
+    </a>
+    <a class="carousel-control-next" href="#mainCarousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Suivant</span>
+    </a>
 </div>
 
-<!-- Bottom Shape -->
-<div class="position-absolute bottom-0 start-50 translate-middle-x w-75" style="height: 300px; background: linear-gradient(to top right, #3490dc, #e3342f); opacity: 0.3; clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%);">
-</div>
-
-<!-- Game Collection Section -->
-<div class="bg-light py-5">
-    <div class="container text-center mb-5">
-        <h2 class="display-5 fw-bold">Découvrez notre collection de jeux</h2>
-        <p class="lead text-muted mt-2">Du classique au moderne, nous avons rassemblé une variété de jeux de société pour satisfaire tous les goûts.</p>
-    </div>
-
-    <div class="container">
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            <!-- Speed Typing -->
-            <div class="col">
-                <div class="card h-100">
-                    <img src="speed-typing.jpg" class="card-img-top" alt="Speed Typing">
-                    <div class="card-body">
-                        <h5 class="card-title">Speed Typing</h5>
-                        <p class="card-text">Affrontez au moins 2 joueurs dans une course de dactylographie en temps réel. Suivez l'avancée des autres joueurs en direct !</p>
-                        
-                    </div>
+<section id="games" class="container my-5">
+    <h2 class="text-center mb-4">Nos Jeux</h2>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card game-card">
+                <img src="https://picsum.photos/400/300?random=4" class="card-img-top" alt="Speed Typing">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Speed Typing</h5>
+                    <p class="card-text">Testez votre vitesse de frappe dans une course effrénée !</p>
+                    <a href="#" class="btn btn-primary">Jouer</a>
                 </div>
             </div>
-
-            <!-- Morpion -->
-            <div class="col">
-                <div class="card h-100">
-                    <img src="morpion.jpg" class="card-img-top" alt="Morpion">
-                    <div class="card-body">
-                        <h5 class="card-title">Morpion</h5>
-                        <p class="card-text">Un jeu classique pour 2 joueurs. Marquez trois symboles consécutifs pour gagner !</p>
-                        
-                    </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card game-card">
+                <img src="https://picsum.photos/400/300?random=5" class="card-img-top" alt="Morpion">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Morpion</h5>
+                    <p class="card-text">Le classique jeu de stratégie pour 2 joueurs.</p>
+                    <a href="#" class="btn btn-primary">Jouer</a>
                 </div>
             </div>
-
-            <!-- Bataille Navale -->
-            <div class="col">
-                <div class="card h-100">
-                    <img src="bataille-navale.jpg" class="card-img-top" alt="Bataille Navale">
-                    <div class="card-body">
-                        <h5 class="card-title">Bataille Navale</h5>
-                        <p class="card-text">Affrontez un adversaire dans ce jeu stratégique à 2 joueurs. Trouvez et coulez les navires de votre ennemi avant qu'il ne coule les vôtres.</p>
-                        
-                    </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card game-card">
+                <img src="https://picsum.photos/400/300?random=6" class="card-img-top" alt="Bataille Navale">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Bataille Navale</h5>
+                    <p class="card-text">Coulez la flotte de votre adversaire !</p>
+                    <a href="#" class="btn btn-primary">Jouer</a>
                 </div>
             </div>
-
-            <!-- Petit Bac -->
-            <div class="col">
-                <div class="card h-100">
-                    <img src="petit-bac.jpg" class="card-img-top" alt="Petit Bac">
-                    <div class="card-body">
-                        <h5 class="card-title">Petit Bac</h5>
-                        <p class="card-text">Un jeu de lettres et de rapidité pour 2 joueurs ou plus. Le host du lobby valide les réponses en fin de partie.</p>
-                        
-                    </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card game-card">
+                <img src="https://picsum.photos/400/300?random=7" class="card-img-top" alt="Petit Bac">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Petit Bac</h5>
+                    <p class="card-text">Trouvez des mots dans différentes catégories !</p>
+                    <a href="#" class="btn btn-primary">Jouer</a>
                 </div>
             </div>
-
-            <!-- Course de Labyrinthe -->
-            <div class="col">
-                <div class="card h-100">
-                    <img src="labyrinthe.jpg" class="card-img-top" alt="Course de Labyrinthe">
-                    <div class="card-body">
-                        <h5 class="card-title">Course de Labyrinthe</h5>
-                        <p class="card-text">Un labyrinthe généré aléatoirement pour une course à sortir avant les autres. Affrontez 2 joueurs ou plus dans cette aventure !</p>
-                        
-                    </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card game-card">
+                <img src="https://picsum.photos/400/300?random=8" class="card-img-top" alt="Course de Labyrinthe">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Course de Labyrinthe</h5>
+                    <p class="card-text">Trouvez la sortie avant vos adversaires !</p>
+                    <a href="#" class="btn btn-primary">Jouer</a>
                 </div>
             </div>
         </div>
     </div>
+</section>
 
-</div>
-
+<section class="container my-5">
+    <h2 class="text-center mb-4">Fonctionnalités</h2>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card feature-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-users mr-2"></i>Lobbys publics et privés</h5>
+                    <p class="card-text">Créez ou rejoignez des lobbys pour jouer avec vos amis. Option de lobbys privés avec mot de passe.</p>
+                    <a href="#" class="btn btn-outline-primary">Voir les lobbys</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card feature-card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-trophy mr-2"></i>Classements</h5>
+                    <p class="card-text">Consultez les meilleurs scores pour chaque jeu et relevez des défis.</p>
+                    <a href="#" class="btn btn-outline-primary">Voir les classements</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
