@@ -19,6 +19,7 @@ namespace GamingPlatform.Controllers
             _context = context;
         }
 
+
         // GET: Users
         public async Task<IActionResult> Index()
         {
