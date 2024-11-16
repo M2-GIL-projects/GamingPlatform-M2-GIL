@@ -1,0 +1,208 @@
+@{
+    ViewData["Title"] = "Speed Typing - Accueil";
+}
+
+<div class="container mt-4">
+
+    <h2>Bienvenue dans le jeu de Speed Typing</h2>
+
+    <div class="row">
+        <!-- Colonne 1 : Règle du jeu -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Règle du jeu</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><i class="fa fa-angle-right text-primary me-2"></i>Règle 1</li>
+                        <li><i class="fa fa-angle-right text-primary me-2"></i>Règle 2</li>
+                        <li><i class="fa fa-angle-right text-primary me-2"></i>Règle 3</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne 2 : Lobbys en attente et Historique -->
+        <div class="col-md-6">
+            <!-- Lobbys en attente -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>Lobbys en attente</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-sm btn-outline-primary mb-3" data-toggle="modal"
+                            data-target="#createLobbyModal">Créer un lobby</button>
+                    </div>
+                    <ul id="lobbyList" class="list-group">
+                        <!-- Liste des lobbies chargée dynamiquement par JavaScript -->
+                    </ul>
+                </div>
+            </div>
+
+
+            <!-- Historique -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>Historique des Meilleurs Joueurs</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <!-- Joueur 1 -->
+                        <li class="list-group-item d-flex align-items-center">
+                            <h5>1</h5>
+                            <img src="https://picsum.photos/400/300?random=1" alt="Photo du joueur 5"
+                                class="rounded-circle me-3 mx-2" width="50" height="50">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0">Charles Martin</h6>
+                            </div>
+                            <span class="badge bg-outline-primary rounded-pill">1500</span>
+                        </li>
+
+                        <!-- Joueur 2 -->
+                        <li class="list-group-item d-flex align-items-center">
+                            <h5>2</h5>
+                            <img src="https://picsum.photos/400/300?random=2" alt="Photo du joueur 2"
+                                class="rounded-circle me-3 mx-2" width="50" height="50">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0">Magloire</h6>
+                            </div>
+                            <span class="badge bg-outline-primary rounded-pill">1200</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal pour le mot de passe et le pseudo du lobby public -->
+    <div class="modal fade" id="publicModal" tabindex="-1" aria-labelledby="publicModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="publicModalLabel">Rejoindre un Lobby Public</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Champ pour le pseudo -->
+                    <div class="form-group">
+                        <label for="playerName">Pseudo</label>
+                        <input type="text" class="form-control" id="playerName" placeholder="Entrez votre pseudo"
+                            required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="joinLobby(false)">Rejoindre</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal pour le mot de passe et le pseudo du lobby privé -->
+    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="passwordModalLabel">Rejoindre un Lobby Privé</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Champ pour le pseudo -->
+                    <div class="form-group">
+                        <label for="playerName">Pseudo</label>
+                        <input type="text" class="form-control" id="playerName" placeholder="Entrez votre pseudo"
+                            required>
+                    </div>
+
+                    <!-- Champ pour le mot de passe -->
+                    <div class="form-group mt-3">
+                        <label for="lobbyPassword">Mot de passe du lobby</label>
+                        <input type="password" class="form-control" id="lobbyPassword" placeholder="Mot de passe"
+                            required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="joinLobby(true)">Rejoindre</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal pour créer un lobby -->
+    <div class="modal fade" id="createLobbyModal" tabindex="-1" role="dialog" aria-labelledby="createLobbyModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createLobbyModalLabel">Créer un Nouveau Lobby</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="createLobbyForm">
+                        <div class="form-group">
+                            <label for="lobbyName">Nom du lobby</label>
+                            <input type="text" class="form-control" id="lobbyName" placeholder="Nom du lobby" required>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="privateLobby">
+                            <label class="form-check-label" for="privateLobby">Créer un lobby privé</label>
+                        </div>
+                        <div id="passwordField" class="form-group d-none mt-3">
+                            <label for="lobbyPassword">Mot de passe</label>
+                            <input type="password" class="form-control" id="lobbyPassword" placeholder="Mot de passe">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="submitLobbyForm()">Créer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="joinLobbyModal" tabindex="-1" role="dialog" aria-labelledby="joinLobbyModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="joinLobbyModalLabel">Rejoindre un Lobby</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="lobbyCodeInput">
+                    <div class="form-group">
+                        <label for="playerName">Pseudo</label>
+                        <input type="text" class="form-control" id="playerName" placeholder="Entrez votre pseudo"
+                            required>
+                    </div>
+                    <div class="form-group mt-3 d-none" id="joinPasswordField">
+                        <label for="lobbyPassword">Mot de passe</label>
+                        <input type="password" class="form-control" id="joinLobbyPassword" placeholder="Mot de passe"
+                            required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="joinLobby()">Rejoindre</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>

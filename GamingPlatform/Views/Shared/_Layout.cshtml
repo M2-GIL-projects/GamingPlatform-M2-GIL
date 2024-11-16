@@ -37,12 +37,18 @@
                         <a class="nav-link" asp-controller="Home" asp-action="Contact"><i
                                 class="fas fa-envelope mr-1"></i>Contact</a>
                     </li>
+                     <li class="nav-item">
+                        <a asp-action="AddGame" class="nav-link" >Ajouter jeux</a>
+                         
+                    </li>
+                    
                 </ul>
             </div>
         </div>
     </nav>
 
     <main role="main" class="pb-3">
+        <br><br><br>
         @RenderBody()
     </main>
 
@@ -74,12 +80,15 @@
         </div>
     </footer>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <!-- jQuery - ne gardez qu'une seule version -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Popper.js (nécessaire pour certains composants Bootstrap comme les tooltips) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
+    <!-- Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/speedTyping.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 
