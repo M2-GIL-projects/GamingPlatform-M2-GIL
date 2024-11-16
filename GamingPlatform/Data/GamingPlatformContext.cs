@@ -14,6 +14,6 @@ namespace GamingPlatform.Data
         {
         }
 
-        public DbSet<GamingPlatform.Models.User> User { get; set; } = default!;
+        
     }
 }

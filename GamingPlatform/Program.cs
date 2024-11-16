@@ -33,5 +33,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapHub<ChatHub>("/chatHub");
+app.MapHub<LabyrinthHub>("/labyrinthHub");
 
 app.Run();

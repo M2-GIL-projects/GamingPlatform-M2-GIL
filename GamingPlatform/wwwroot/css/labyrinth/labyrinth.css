@@ -1,0 +1,29 @@
+﻿#labyrinth {
+    display: grid;
+    grid-template-columns: repeat(10, 30px); /* Ajustez en fonction des dimensions */
+    grid-gap: 2px;
+}
+
+.cell {
+    width: 30px;
+    height: 30px;
+    background-color: #ddd;
+    position: relative;
+    box-sizing: border-box;
+}
+
+    .cell.wall-top {
+        border-top: 2px solid black;
+    }
+
+    .cell.wall-right {
+        border-right: 2px solid black;
+    }
+
+    .cell.wall-bottom {
+        border-bottom: 2px solid black;
+    }
+
+    .cell.wall-left {
+        border-left: 2px solid black;
+    }
