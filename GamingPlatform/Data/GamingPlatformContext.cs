@@ -14,60 +14,46 @@ namespace GamingPlatform.Data
         {
         }
 
-       public DbSet<GamingPlatform.Models.User> User { get; set; } = default!;
-        public DbSet<Joueur> LesPlayers { get; set; }
-        public DbSet<Lobby> Lobbies { get; set; }
-        public DbSet<PlayerLobby> PlayerLobbies { get; set; }
-        public DbSet<Game> Games { get; set; }
-        public DbSet<GameType> TypeGames { get; set; }
-        public DbSet<Score> Scores { get; set; }
+        public DbSet<Player> Player { get; set; }
+        public DbSet<Lobby> Lobby { get; set; }
+        public DbSet<Game> Game { get; set; }
+
+        public DbSet<LobbyPlayer> LobbyPlayer { get; set; }
+        public DbSet<Score> Score { get; set; }
         public DbSet<Sentence> Sentences { get; set; }
 
-        // Utilisation d'un DbSet générique pour permettre l'héritage des jeux.
-        public DbSet<SpeedTypingGame> SpeedTypingGames => Set<SpeedTypingGame>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<PlayerLobby>()
-                .HasKey(pl => new { pl.JoueurId, pl.LobbyId });
+            // Contrainte d'unicité pour le champ Code dans Games
+            modelBuilder.Entity<Game>()
+                .HasIndex(g => g.Code)
+                .IsUnique();
 
-            modelBuilder.Entity<PlayerLobby>()
-                .HasOne(pl => pl.Joueur)
-                .WithMany(u => u.PlayerLobbies)
-                .HasForeignKey(pl => pl.JoueurId);
+            // Configuration de la relation plusieurs-à-plusieurs entre Player et Lobby
+            modelBuilder.Entity<LobbyPlayer>()
+                .HasKey(lp => new { lp.PlayerId, lp.LobbyId });
 
-            modelBuilder.Entity<PlayerLobby>()
-                .HasOne(pl => pl.Lobby)
-                .WithMany(l => l.Players)
-                .HasForeignKey(pl => pl.LobbyId);
+            modelBuilder.Entity<LobbyPlayer>()
+                .HasOne(lp => lp.Player)
+                .WithMany(p => p.LobbyPlayers)
+                .HasForeignKey(lp => lp.PlayerId);
 
+            modelBuilder.Entity<LobbyPlayer>()
+                .HasOne(lp => lp.Lobby)
+                .WithMany(l => l.LobbyPlayers)
+                .HasForeignKey(lp => lp.LobbyId);
+
+            // Relation entre Lobby et Game via GameCode
             modelBuilder.Entity<Lobby>()
-                .Property(l => l.Code)
-                .IsRequired()
-                .HasMaxLength(6);
-
-            modelBuilder.Entity<Lobby>()
-                .Property(l => l.Name)
-                .IsRequired();
-
-            modelBuilder.Entity<Game>()
-                .HasOne(g => g.Lobby)
+                .HasOne(l => l.Game)
                 .WithMany()
-                .HasForeignKey(g => g.LobbyId)
-                .IsRequired(false);  // Ceci rend la relation optionnelle
-
-            modelBuilder.Entity<Game>()
-                .HasOne(g => g.GameType)
-                .WithMany()
-                .HasForeignKey(g => g.GameTypeId);
-
-            // Héritage
-            modelBuilder.Entity<Game>()
-                .HasDiscriminator<string>("GameTypes")
-                .HasValue<SpeedTypingGame>("SpeedTyping")
-                .HasValue<MorpionGame>("Morpion");
+                .HasForeignKey(l => l.GameCode)
+                .HasPrincipalKey(g => g.Code)
+                .OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);
         }
+            
     }
 }

@@ -1,9 +1,7 @@
 using GamingPlatform.Hubs;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using GamingPlatform.Data;
 using GamingPlatform.Services;
-using GamingPlatform.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<GamingPlatformContext>(options =>
@@ -12,8 +10,9 @@ builder.Services.AddDbContext<GamingPlatformContext>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
-builder.Services.AddScoped<IGameService, GameService>();
-
+builder.Services.AddScoped<GameService>();
+builder.Services.AddScoped<LobbyService>();
+builder.Services.AddScoped<GameSeeder>();
 
 var app = builder.Build();
 
@@ -23,6 +22,14 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+// Initialiser les données
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var seeder = services.GetRequiredService<GameSeeder>();
+    seeder.SeedGames();
 }
 
 app.UseHttpsRedirection();
@@ -35,6 +42,26 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
+    name: "game-details",
+    pattern: "game/details/{id?}",
+    defaults: new { controller = "Game", action = "Details" });
+
+app.MapControllerRoute(
+    name: "create-lobby-select",
+    pattern: "lobby/create/select",
+    defaults: new { controller = "Lobby", action = "CreateWithSelect" });
+
+app.MapControllerRoute(
+    name: "create-lobby-game",
+    pattern: "lobby/create/game/{gameCode}",
+    defaults: new { controller = "Lobby", action = "CreateFromGame" });
+
+app.MapControllerRoute(
+        name: "gameLobbies",
+        pattern: "game/{gameCode}/lobbies",
+        defaults: new { controller = "Game", action = "LobbiesByGameCode" });
 
 app.MapHub<ChatHub>("/chatHub");
 app.MapHub<LabyrinthHub>("/labyrinthHub");

@@ -1,0 +1,54 @@
+﻿@model GameDetailsViewModel
+
+@{
+    ViewData["Title"] = "Lobbies pour " + Model.Game.Name;
+}
+
+<div class="game-lobbies container my-5">
+    <!-- En-tête avec le titre du jeu -->
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="display-4">@Model.Game.Name</h1>
+        </div>
+    </div>
+
+    <!-- Liste des lobbies associés à ce jeu -->
+    <div class="mt-5">
+        <h2 class="mb-4">Tous les lobbies pour ce jeu</h2>
+
+        @if (Model.Lobbies != null && Model.Lobbies.Any())
+        {
+            <div class="row">
+                @foreach (var lobby in Model.Lobbies)
+                {
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">@lobby.Name</h5>
+                                <p class="card-text">
+                                    <strong>Statut :</strong> @lobby.Status <br />
+                                    <strong>Créé le :</strong> @lobby.CreatedAt.ToString("dd/MM/yyyy HH:mm") <br />
+                                    @if (lobby.IsPrivate)
+                                    {
+                                        <strong>Type :</strong>
+                                        @:Privé
+                                            }
+                                    else
+                                    {
+                                        <strong>Type :</strong>
+                                        @:Public
+                                            }
+                                </p>
+                                <a href="/lobby/details/@lobby.Id" class="btn btn-sm btn-outline-primary">Rejoindre</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">Aucun lobby n'a encore été créé pour ce jeu.</p>
+        }
+    </div>
+</div>

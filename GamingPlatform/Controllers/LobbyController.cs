@@ -1,146 +1,128 @@
-using GamingPlatform.Data;
-using GamingPlatform.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using GamingPlatform.Services;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using GamingPlatform.Models;
 
 namespace GamingPlatform.Controllers
 {
     public class LobbyController : Controller
     {
-        private readonly GamingPlatformContext _context;
+        private readonly LobbyService _lobbyService;
+        private readonly GameService _gameService;
 
-        public LobbyController(GamingPlatformContext context)
+        public LobbyController(LobbyService lobbyService, GameService gameService)
         {
-            _context = context;
+            _lobbyService = lobbyService;
+            _gameService = gameService;
         }
 
-        public IActionResult Create()
+        public IActionResult Index(string? name, string? gameCode, LobbyStatus? status)
         {
-            return View();
-        }
+            // Charger les lobbies
+            var lobbies = _lobbyService.GetAllLobbies();
 
-        [HttpPost]
-        public async Task<IActionResult> CreateLobby(Lobby lobby)
-        {
-            lobby.Id = Guid.NewGuid();
-            lobby.Code = GenerateLobbyCode();
-            lobby.Status = LobbyStatus.Waiting;
-            lobby.CreatedAt = DateTime.Now;
-
-            if (lobby.IsPrivate && string.IsNullOrWhiteSpace(lobby.Password))
+            // Appliquer les filtres
+            if (!string.IsNullOrEmpty(name))
             {
-                return BadRequest("Les lobbies privés doivent avoir un mot de passe.");
+                lobbies = lobbies.Where(l => l.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
             }
 
-            _context.Lobbies.Add(lobby);
-            await _context.SaveChangesAsync();
+            if (!string.IsNullOrEmpty(gameCode))
+            {
+                lobbies = lobbies.Where(l => l.GameCode == gameCode);
+            }
 
-            return RedirectToAction("Join", new { code = lobby.Code });
+            if (status.HasValue)
+            {
+                lobbies = lobbies.Where(l => l.Status == status.Value);
+            }
+
+            // Charger les jeux pour les filtres
+            ViewBag.Games = _gameService.GetAvailableGames();
+
+            return View(lobbies);
         }
 
-        public IActionResult Join(string code)
+        public IActionResult Details(Guid id)
         {
-            var lobby = _context.Lobbies.FirstOrDefault(l => l.Code == code);
+            var lobby = _lobbyService.GetLobbyWithGameAndPlayers(id);
             if (lobby == null)
             {
-                return NotFound("Lobby non trouvé.");
+                return NotFound();
             }
+
             return View(lobby);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> JoinLobby(string lobbyCode, string playerName, string password)
-        {
-            var lobby = await _context.Lobbies
-                .Include(l => l.Players)
-                .FirstOrDefaultAsync(l => l.Code == lobbyCode);
 
-            if (lobby == null)
-            {
-                return NotFound("Lobby non trouvé.");
-            }
-
-            if (lobby.IsPrivate && lobby.Password != password)
-            {
-                return BadRequest("Mot de passe incorrect pour ce lobby privé.");
-            }
-
-          var player = new Joueur { Pseudo = playerName };
-            
-            // Ajoutez le joueur à la table de jonction PlayerLobby
-            var playerLobbyEntry = new PlayerLobby { JoueurId = player.Id, LobbyId = lobby.Id };
-            
-            _context.PlayerLobbies.Add(playerLobbyEntry); // Assurez-vous que PlayerLobby est bien configuré
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, redirectUrl = $"/Game/Play?code={lobbyCode}" });
-        }
-
+        // Affiche un formulaire avec un select pour choisir un jeu
         [HttpGet]
-        public async Task<IActionResult> GetAvailableLobbies()
+        public IActionResult CreateWithSelect()
         {
-            var lobbies = await _context.Lobbies
-                .Where(l => l.Status == LobbyStatus.Waiting)
-                .Select(l => new 
+            // Récupérer tous les jeux pour la liste déroulante
+            var games = _gameService.GetAvailableGames();
+            ViewBag.Games = games;
+            return View();
+        }
+
+        // Crée un lobby à partir du formulaire CreateWithSelect
+        [HttpPost]
+        public IActionResult CreateWithSelect(string name, Guid gameId, bool isPrivate, string? password)
+        {
+            try
+            {
+                var lobby = _lobbyService.CreateLobby(name, gameId, isPrivate, password);
+                return RedirectToAction("Details", new { id = lobby.Id });
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                ViewBag.Games = _gameService.GetAvailableGames();
+                return View();
+            }
+        }
+
+        // Crée un lobby à partir d'un jeu (le code du jeu est passé en paramètre)
+        [HttpGet]
+        public IActionResult CreateFromGame(string gameCode)
+        {
+            var game = _gameService.GetGameByCode(gameCode);
+            if (game == null)
+            {
+                return NotFound("Le jeu spécifié n'existe pas.");
+            }
+
+            return View(game);
+        }
+
+        // Traite la création d'un lobby à partir d'un jeu
+        [HttpPost]
+        public IActionResult CreateFromGame(string name, Guid gameId, bool isPrivate, string? password)
+        {
+            try
+            {
+                var lobby = _lobbyService.CreateLobby(name, gameId, isPrivate, password);
+                return RedirectToAction("Details", new { id = lobby.Id });
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = ex.Message;
+                var game = _gameService.GetGameById(gameId);
+                if (game == null)
                 {
-                    l.Code,
-                    l.Name,
-                    l.GameType,
-                    l.IsPrivate,
-                    PlayerCount = l.Players.Count
-                })
-                .ToListAsync();
+                    return NotFound("Le jeu spécifié n'existe pas.");
+                }
 
-            return Json(lobbies);
+                return View(game);
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> StartGame(string lobbyCode)
+        public IActionResult Start(Guid id)
         {
-            var lobby = await _context.Lobbies.FirstOrDefaultAsync(l => l.Code == lobbyCode);
-            if (lobby == null)
-            {
-                return NotFound("Lobby non trouvé.");
-            }
-
-            lobby.Status = LobbyStatus.InProgress;
-            await _context.SaveChangesAsync();
-
-            // Ici, vous pouvez ajouter la logique pour démarrer le jeu
-            return RedirectToAction("Play", "Game", new { code = lobbyCode });
-        }
-
-    /*
-        [HttpPost]
-        public async Task<IActionResult> LeaveLobby(string lobbyCode, string playerName)
-        {
-            var lobby = await _context.Lobbies
-                .Include(l => l.Players)
-                .FirstOrDefaultAsync(l => l.Code == lobbyCode);
-
-            if (lobby == null)
-            {
-                return NotFound("Lobby non trouvé.");
-            }
-
-            var player = lobby.Players.FirstOrDefault(p => p.Pseudo == playerName);
-            if (player != null)
-            {
-                lobby.Players.Remove(player);
-                await _context.SaveChangesAsync();
-            }
+            _lobbyService.StartGame(id);
 
             return Ok();
-        }*/
-
-        private string GenerateLobbyCode()
-        {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, 6)
-                .Select(s => s[new Random().Next(s.Length)]).ToArray());
         }
     }
 }
