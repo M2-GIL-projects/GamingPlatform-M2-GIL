@@ -14,7 +14,7 @@ namespace GamingPlatform.Services
         }
 
         // Crée un nouveau lobby.
-        public Lobby CreateLobby(string name, Guid gameId, bool isPrivate, string? password = null)
+        public Lobby CreateLobby(string name, Guid gameId, bool isPrivate, int? playerId = null, string? password = null)
         {
             var game = _context.Game.Find(gameId);
             if (game == null)
@@ -33,6 +33,22 @@ namespace GamingPlatform.Services
                 Status = LobbyStatus.Waiting,
                 CreatedAt = DateTime.Now
             };
+
+            // Vérifier si un joueur est connecté
+            if (playerId.HasValue)
+            {
+                Player? player = _context.Player.Find(playerId.Value);
+                if (player != null)
+                {
+                    var lobbyPlayer = new LobbyPlayer
+                    {
+                        LobbyId = lobby.Id,
+                        PlayerId = player.Id
+                    };
+
+                    lobby.LobbyPlayers.Add(lobbyPlayer);
+                }
+            }
 
             _context.Lobby.Add(lobby);
             _context.SaveChanges();
@@ -70,13 +86,13 @@ namespace GamingPlatform.Services
 
 
         // Récupère tous les lobbies disponibles.
-        public IEnumerable<Lobby> GetAllLobbies()
+        public async Task<IEnumerable<Lobby>> GetAllLobbies()
         {
-            return _context.Lobby
+            return await _context.Lobby
                 .Include(l => l.Game) // Inclut l'objet Game lié au Lobby
                 .Include(l => l.LobbyPlayers) // Inclut la collection LobbyPlayers
                     .ThenInclude(lp => lp.Player) // Inclut les objets Player dans LobbyPlayers
-                .ToList();
+                .ToListAsync();
         }
 
         public async Task<List<Lobby>> GetLobbiesByGameAsync(string gameCode)

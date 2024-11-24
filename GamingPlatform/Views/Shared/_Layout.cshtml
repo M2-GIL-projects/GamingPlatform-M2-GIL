@@ -30,8 +30,9 @@
                             <i class="fas fa-th-large mr-1"></i>Lobbies</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Games" asp-action="New"><i
-                                class="fas fa-star mr-1"></i>Nouveautés</a>
+                        <a class="nav-link" href="@Url.Action("Player", "Home")">
+                            <i class="fas fa-user-circle mr-1"></i>Compte
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Home" asp-action="Contact"><i
@@ -44,7 +45,6 @@
     </nav>
 
     <main role="main" class="pb-3">
-        <br><br><br>
         @RenderBody()
     </main>
 

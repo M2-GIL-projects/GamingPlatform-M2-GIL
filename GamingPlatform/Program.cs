@@ -12,9 +12,17 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<GameService>();
 builder.Services.AddScoped<LobbyService>();
+builder.Services.AddScoped<PlayerService>();
 builder.Services.AddScoped<GameSeeder>();
 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(90); // Durée de la session
+    options.Cookie.HttpOnly = true; // Sécuriser le cookie
+});
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -34,6 +42,8 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+app.UseSession(); 
 
 app.UseRouting();
 

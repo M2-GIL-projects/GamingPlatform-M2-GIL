@@ -9,6 +9,8 @@ namespace GamingPlatform.Models
 
         public Guid LobbyId { get; set; }
         public Lobby Lobby { get; set; }
+
+        public DateTime JoinedAt { get; set; } = DateTime.Now;
     }
 }
 

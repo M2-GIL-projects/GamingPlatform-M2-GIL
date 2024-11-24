@@ -53,6 +53,15 @@
                     <li class="list-group-item text-danger">Aucun joueur dans ce lobby.</li>
                 }
             </ul>
+            <!-- Si le lobby est privé, afficher le lien d'invitation -->
+            @if (Model.IsPrivate)
+            {
+                    <div class="mt-4">
+                        <h4>Inviter un joueur :</h4>
+                        <p>Copiez et envoyez ce lien à vos amis pour les inviter dans ce lobby :</p>
+                        <input type="text" class="form-control" value=" @Url.Action("JoinPrivateLobby", "Lobby", new { id = Model.Id, password = Model.Password })" readonly />
+                    </div>
+            }
 
             <!-- Actions basées sur le status -->
             <div class="mt-4 text-center">

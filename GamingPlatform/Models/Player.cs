@@ -7,7 +7,7 @@ public class Player
     public int Id { get; set; }    
     public string Pseudo { get; set; }
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
     public string? email { get; set; }
 
     // Relation : Un joueur peut participer à plusieurs lobbies

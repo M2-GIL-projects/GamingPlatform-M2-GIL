@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GamingPlatform.Migrations
 {
     [DbContext(typeof(GamingPlatformContext))]
-    [Migration("20241123213432_UpdateGamesTABLE")]
-    partial class UpdateGamesTABLE
+    [Migration("20241124191140_UpdateLobbyPlayer")]
+    partial class UpdateLobbyPlayer
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -102,6 +102,9 @@ namespace GamingPlatform.Migrations
                     b.Property<Guid>("LobbyId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("PlayerId", "LobbyId");
 
                     b.HasIndex("LobbyId");
@@ -118,7 +121,6 @@ namespace GamingPlatform.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Pseudo")
@@ -185,7 +187,7 @@ namespace GamingPlatform.Migrations
                         .WithMany()
                         .HasForeignKey("GameCode")
                         .HasPrincipalKey("Code")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Game");

@@ -9,17 +9,19 @@ namespace GamingPlatform.Controllers
     {
         private readonly LobbyService _lobbyService;
         private readonly GameService _gameService;
+        private readonly PlayerService _playerService;
 
-        public LobbyController(LobbyService lobbyService, GameService gameService)
+        public LobbyController(LobbyService lobbyService, GameService gameService, PlayerService playerService)
         {
             _lobbyService = lobbyService;
             _gameService = gameService;
+            _playerService = playerService;
         }
 
-        public IActionResult Index(string? name, string? gameCode, LobbyStatus? status)
+        public async Task<IActionResult> Index(string? name, string? gameCode, LobbyStatus? status)
         {
             // Charger les lobbies
-            var lobbies = _lobbyService.GetAllLobbies();
+            var lobbies = await _lobbyService.GetAllLobbies();
 
             // Appliquer les filtres
             if (!string.IsNullOrEmpty(name))
@@ -67,11 +69,17 @@ namespace GamingPlatform.Controllers
 
         // Crée un lobby à partir du formulaire CreateWithSelect
         [HttpPost]
-        public IActionResult CreateWithSelect(string name, Guid gameId, bool isPrivate, string? password)
+        public async Task<IActionResult> CreateWithSelect(string name, Guid gameId, bool isPrivate, string? password)
         {
+            int? playerId = null;
+            var player = await GetCurrentPlayer();
+            if (player != null)
+            {
+                playerId = player.Id;
+            }
             try
             {
-                var lobby = _lobbyService.CreateLobby(name, gameId, isPrivate, password);
+                var lobby = _lobbyService.CreateLobby(name, gameId, isPrivate, playerId, password);
                 return RedirectToAction("Details", new { id = lobby.Id });
             }
             catch (Exception ex)
@@ -97,11 +105,17 @@ namespace GamingPlatform.Controllers
 
         // Traite la création d'un lobby à partir d'un jeu
         [HttpPost]
-        public IActionResult CreateFromGame(string name, Guid gameId, bool isPrivate, string? password)
+        public async Task<IActionResult> CreateFromGame(string name, Guid gameId, bool isPrivate, string? password)
         {
+            int? playerId = null;
+            var player = await GetCurrentPlayer();
+            if (player != null)
+            {
+                playerId = player.Id;
+            }
             try
             {
-                var lobby = _lobbyService.CreateLobby(name, gameId, isPrivate, password);
+                var lobby = _lobbyService.CreateLobby(name, gameId, isPrivate, playerId ,password);
                 return RedirectToAction("Details", new { id = lobby.Id });
             }
             catch (Exception ex)
@@ -123,6 +137,67 @@ namespace GamingPlatform.Controllers
             _lobbyService.StartGame(id);
 
             return Ok();
+        }
+
+        public async Task<Player> GetCurrentPlayer()
+        {
+            // Récupérer l'ID du joueur depuis la session
+            var playerId = HttpContext.Session.GetInt32("PlayerId");
+
+            if (playerId.HasValue)
+            {
+                return await _playerService.GetPlayerByIdAsync(playerId.Value);
+            }
+
+            return null;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> JoinPrivateLobby(Guid id, string password)
+        {
+            var lobby = _lobbyService.GetLobbyById(id);
+
+            if (lobby == null)
+            {
+                return NotFound();
+            }
+
+            // Vérifier si le mot de passe correspond pour un lobby privé
+            if (lobby.IsPrivate && lobby.Password != password)
+            {
+                return Unauthorized();
+            }
+
+            // Logique pour ajouter un joueur au lobby
+            var player = await GetCurrentPlayer();
+            if (player != null)
+            {
+                // Ajouter le joueur au lobby
+                _lobbyService.AddPlayerToLobby(id, player.Id);
+            }
+
+            return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> JoinLobby(Guid id)
+        {
+            var lobby = _lobbyService.GetLobbyById(id);
+
+            if (lobby == null)
+            {
+                return NotFound();
+            }
+
+            // Logique pour ajouter un joueur au lobby
+            var player = await GetCurrentPlayer();
+            if (player != null)
+            {
+                // Ajouter le joueur au lobby
+                _lobbyService.AddPlayerToLobby(id, player.Id);
+            }
+
+            return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
         }
     }
 }
