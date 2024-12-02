@@ -15,12 +15,14 @@ namespace GamingPlatform.Data
         }
 
         public DbSet<Player> Player { get; set; }
+        public DbSet<Game> Game { get; set; } 
         public DbSet<Lobby> Lobby { get; set; }
-        public DbSet<Game> Game { get; set; }
-
         public DbSet<LobbyPlayer> LobbyPlayer { get; set; }
         public DbSet<Score> Score { get; set; }
         public DbSet<Sentence> Sentences { get; set; }
+        public DbSet<PetitBacGame> PetitBacGames { get; set; }
+        public DbSet<Answer> Answers { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -52,8 +54,33 @@ namespace GamingPlatform.Data
                 .HasPrincipalKey(g => g.Code)
                 .OnDelete(DeleteBehavior.Restrict);
 
+                // Ajouter kes realation de petitBacplayer et petitbac        
+
+    // Configuration pour PetitBacGame
+    modelBuilder.Entity<PetitBacGame>()
+        .HasOne(pbg => pbg.Lobby)
+        .WithOne(l => l.PetitBacGame)
+        .HasForeignKey<PetitBacGame>(pbg => pbg.LobbyId);
+
+    // Configuration pour PetitBacPlayer
+    modelBuilder.Entity<PetitBacPlayer>()
+        .HasOne(pbp => pbp.PetitBacGame)
+        .WithMany(pbg => pbg.Players)
+        .HasForeignKey(pbp => pbp.PetitBacGameId);
+
+    base.OnModelCreating(modelBuilder);
+
             base.OnModelCreating(modelBuilder);
+
+    //Configurez la relation entre Answer et PetitBacPlayer 
+    modelBuilder.Entity<Answer>()
+        .HasOne(a => a.PetitBacPlayer)
+        .WithMany(p => p.Answers)
+        .HasForeignKey(a => a.PetitBacPlayerId);
+
         }
-            
     }
-}
+    }
+
+
+
