@@ -22,6 +22,7 @@ namespace GamingPlatform.Data
         public DbSet<Sentence> Sentences { get; set; }
         public DbSet<PetitBacGame> PetitBacGames { get; set; }
         public DbSet<Answer> Answers { get; set; }
+        public DbSet<PetitBacPlayer> PetitBacPlayer { get; set; }
 
 
 
@@ -72,7 +73,7 @@ namespace GamingPlatform.Data
 
             base.OnModelCreating(modelBuilder);
 
-    //Configurez la relation entre Answer et PetitBacPlayer 
+    //Configurez la relation entre Answer et PetitBacPlayer :
     modelBuilder.Entity<Answer>()
         .HasOne(a => a.PetitBacPlayer)
         .WithMany(p => p.Answers)

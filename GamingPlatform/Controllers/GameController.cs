@@ -1,96 +1,116 @@
 using GamingPlatform.Models;
+using GamingPlatform.Data;
 using GamingPlatform.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace GamingPlatform.Controllers{
-public class GameController : Controller
+namespace GamingPlatform.Controllers
 {
-
+    public class GameController : Controller
+    {
         private readonly GameService _gameService;
         private readonly LobbyService _lobbyService;
+        private readonly GamingPlatformContext _context;
 
-        public GameController(GameService gameService, LobbyService lobbyService)
+        // Constructeur avec injection de dÃ©pendances
+        public GameController(GameService gameService, LobbyService lobbyService, GamingPlatformContext context)
         {
             _gameService = gameService;
             _lobbyService = lobbyService;
+            _context = context;
         }
 
+        // Page d'accueil des jeux disponibles
         public IActionResult Index()
         {
-            var games = _gameService.GetAvailableGames(); // Implémentez GetAvailableGames dans le service
+            var games = _gameService.GetAvailableGames(); // ImplÃ©mentez GetAvailableGames dans GameService
             return View(games);
         }
 
-        // Affiche les détails d'un jeu en fonction de son code.
+        // Affiche les dÃ©tails d'un jeu en fonction de son ID
         public async Task<IActionResult> Details(Guid id)
         {
-            // Récupérer le jeu par le code
             var game = _gameService.GetGameById(id);
             if (game == null)
             {
-                // Retourner une page d'erreur si le jeu n'existe pas
-                return NotFound("Le jeu spécifié n'existe pas.");
+                return NotFound("Le jeu spÃ©cifiÃ© n'existe pas.");
             }
 
-            // Récupérer les lobbies associés au jeu
             var lobbies = await _lobbyService.GetLobbiesByGameAsync(game.Code);
 
-            // Créer un modèle de vue combiné
             var viewModel = new GameDetailsViewModel
             {
                 Game = game,
                 Lobbies = lobbies
             };
 
-            // Passer le modèle de vue à la vue
             return View(viewModel);
         }
 
-
-        // Affiche les détails d'un jeu en fonction de son code.
+        // Affiche les lobbies d'un jeu en fonction de son code
         public async Task<IActionResult> LobbiesByGameCode(string gameCode)
         {
-            // Récupérer le jeu par le code
             var game = _gameService.GetGameByCode(gameCode);
             if (game == null)
             {
-                // Retourner une page d'erreur si le jeu n'existe pas
-                return NotFound("Le jeu spécifié n'existe pas.");
+                return NotFound("Le jeu spÃ©cifiÃ© n'existe pas.");
             }
 
-            // Récupérer les lobbies associés au jeu
             var lobbies = await _lobbyService.GetLobbiesByGameAsync(gameCode);
 
-            // Créer un modèle de vue combiné
             var viewModel = new GameDetailsViewModel
             {
                 Game = game,
                 Lobbies = lobbies
             };
 
-            // Passer le modèle de vue à la vue
             return View(viewModel);
         }
 
-        //public IActionResult Play(string gameCode, Guid lobbyId)
-        //{
-        //    var game = _gameService.GetGameByCode(gameCode);
-        //    var lobby = _lobbyService.GetLobbyWithGameAndPlayers(lobbyId);
+        // Action pour jouer Ã  un jeu
+       [HttpGet]
+//public IActionResult Play(Guid id)
+//{
+    // Charger les donnÃ©es nÃ©cessaires pour le jeu
+    //var lobby = _context.Lobby // Utilisez le nom correct ici
+      //  .Include(l => l.Game)
+        //.Include(l => l.LobbyPlayers)
+        //.ThenInclude(lp => lp.Player) // Inclure les joueurs dans le lobby
+        //.FirstOrDefault(l => l.Id == id);
 
-        //    if (game == null || lobby == null)
-        //    {
-        //        return NotFound();
-        //    }
+    //if (lobby == null)
+    //{
+      //  return NotFound("Le lobby spÃ©cifiÃ© n'existe pas.");
+    //}
 
-        //    // Logique pour charger le plateau du jeu
-        //    //return View("GameBoard", new GameViewModel { Game = game, Lobby = lobby });
-        //}
+    // Passer les donnÃ©es Ã  la vue
+    //return View(lobby);
+//}
 
+  //  }
+  public IActionResult Start(Guid id)
+{
+    var lobby = _context.Lobby
+        .Include(l => l.Game)
+        .FirstOrDefault(l => l.Id == id);
+
+    if (lobby == null || lobby.Game == null)
+    {
+        return NotFound("Lobby ou jeu introuvable.");
+    }
+
+    // Redirection spÃ©cifique en fonction du jeu
+    if (lobby.Game.Name == "Petit Bac")
+    {
+        return RedirectToAction("Configure", "PetitBac", new { lobbyId = id });
+    }
+    else
+    {
+        // Ajouter la logique pour d'autres jeux ici
+        return RedirectToAction("Play", lobby.Game.Code, new { lobbyId = id });
     }
 }
+    }
 
-public class GameDetailsViewModel
-{
-    public Game Game { get; set; }
-    public List<Lobby> Lobbies { get; set; }
+   
 }

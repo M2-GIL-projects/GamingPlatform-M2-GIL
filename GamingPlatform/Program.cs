@@ -17,8 +17,8 @@ builder.Services.AddScoped<GameSeeder>();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(90); // Durée de la session
-    options.Cookie.HttpOnly = true; // Sécuriser le cookie
+    options.IdleTimeout = TimeSpan.FromMinutes(90); // Durï¿½e de la session
+    options.Cookie.HttpOnly = true; // Sï¿½curiser le cookie
 });
 
 var app = builder.Build();
@@ -32,7 +32,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Initialiser les données
+// Initialiser les donnï¿½es
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -55,7 +55,7 @@ app.MapControllerRoute(
 
 app.MapControllerRoute(
     name: "game-details",
-    pattern: "game/details/{id?}",
+    pattern: "game/details/{id:guid}",
     defaults: new { controller = "Game", action = "Details" });
 
 app.MapControllerRoute(
@@ -73,8 +73,19 @@ app.MapControllerRoute(
         pattern: "game/{gameCode}/lobbies",
         defaults: new { controller = "Game", action = "LobbiesByGameCode" });
 
+// Nouvelle route pour PetitBacController.Configure
+app.MapControllerRoute(
+    name: "petitbac-configure",
+    pattern: "petitbac/configure",
+    defaults: new { controller = "PetitBac", action = "Configure" });
+
 app.MapHub<ChatHub>("/chatHub");
 app.MapHub<LabyrinthHub>("/labyrinthHub");
+
+app.MapControllerRoute(
+    name: "game-play",
+    pattern: "game/play/{id:guid}",
+    defaults: new { controller = "Game", action = "Play" });
 
 // Redirection pour le speed Typing game
 app.MapHub<SpeedTypingGameHub>("/SpeedTypingGame");
