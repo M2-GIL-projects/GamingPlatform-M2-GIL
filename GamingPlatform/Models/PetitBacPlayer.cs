@@ -1,22 +1,29 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
+using System.Text.Json;
 
 namespace GamingPlatform.Models
 {
     public class PetitBacPlayer
     {
         public int Id { get; set; } // Identifiant unique du joueur
+        public string Name { get; set; } // Nom du joueur
 
-        public required string PlayerName { get; set; } // Nom du joueur
+        // Réponses pour toutes les catégories dans une partie (non mappé directement à la base)
+        [NotMapped]
+        public Dictionary<string, string> Responses { get; set; } = new Dictionary<string, string>();
 
-        public bool HasFinished { get; set; } = false; // Indique si le joueur a terminé sa partie
-
-        public List<Answer> Answers { get; set; } = new List<Answer>(); // Liste des réponses fournies par le joueur
+        // Propriété pour stocker le dictionnaire en base sous forme de JSON
+        public string ResponsesJson
+        {
+            get => JsonSerializer.Serialize(Responses);
+            set => Responses = string.IsNullOrEmpty(value)
+                ? new Dictionary<string, string>()
+                : JsonSerializer.Deserialize<Dictionary<string, string>>(value);
+        }
 
         // Relation avec PetitBacGame
-        public int PetitBacGameId { get; set; }
-        public PetitBacGame PetitBacGame { get; set; }
+        public int PetitBacGameId { get; set; } // Clé étrangère vers la partie
+        public PetitBacGame PetitBacGame { get; set; } // Référence à la partie associée
     }
 }

@@ -1,0 +1,44 @@
+@model GamingPlatform.Models.PetitBacGame
+
+<div class="container mt-4">
+    <h1>Configuration de la Partie</h1>
+
+    <h3>Lettre choisie : <span class="text-primary">@Model.Letter</span></h3>
+    <h4>Condition d'arrêt : <span class="text-secondary">@Model.EndCondition</span></h4>
+
+    @if (Model.TimeLimit.HasValue)
+    {
+        <h4>Temps Limite : <span class="text-secondary">@Model.TimeLimit secondes</span></h4>
+    }
+
+    <h3>Catégories sélectionnées :</h3>
+
+    <form method="post" asp-action="SubmitAnswers">
+        <input type="hidden" name="GameId" value="@Model.Id" />
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>Catégorie</th>
+                    <th>Réponse Joueur 1</th>
+                    <th>Réponse Joueur 2</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var category in Model.Categories)
+                {
+                    <tr>
+                        <td>@category.Name</td>
+                        <td>
+                            <input type="text" class="form-control" name="Player1Answers[@category.Name]" />
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" name="Player2Answers[@category.Name]" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <button type="submit" class="btn btn-primary mt-3">Soumettre les réponses</button>
+    </form>
+</div>
