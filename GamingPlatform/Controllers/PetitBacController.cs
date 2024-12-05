@@ -14,43 +14,38 @@ namespace GamingPlatform.Controllers
             _context = context;
         }
 [HttpGet]
-public IActionResult Configure(Guid lobbyId)
-{
-    var model = new PetitBacGame
-    {
-        LobbyId = lobbyId,
-        Letter = 'A',         // Lettre par défaut
-        //EndCondition = "AllPlayersDone" // Condition d'arrêt par défaut
+// Afficher le formulaire de configuration
+        public IActionResult Configure(Guid lobbyId)
+        {
+            // Récupérer le lobby depuis le contexte
+            var lobby = _context.Lobby.FirstOrDefault(l => l.Id == lobbyId);
+            if (lobby == null)
+            {
+                return NotFound("Lobby introuvable.");
+            }
 
-    };
-    return View("Configuration", model); // Retourne la vue Configuration.cshtml
-}
+            // Créer une nouvelle instance du jeu si nécessaire
+            var model = new PetitBacGame
+            {
+                LobbyId = lobbyId,
+                Letter = 'A', // Lettre par défaut
+                PlayerCount = 2, // Par défaut, 2 joueurs
+                CreatorPseudo = "", // Par défaut, pseudo vide
+                Categories = _context.PetitBacCategories.ToList(), // Charger les catégories disponibles
+            };
 
+            // Générer le lien pour inviter des joueurs
+            string linkPlayer2 = $"{Request.Scheme}://{Request.Host}/PetitBac/Join?code={lobby.Code}&playerId=2";
+            ViewBag.LinkPlayer2 = linkPlayer2;
 
-[HttpGet]
-//tester la connexion avec la base de données 
-public IActionResult TestDatabase()
-{
-    try
-    {
-        var games = _context.PetitBacGames.Include(g => g.Categories).ToList();
-        return Json(games);
-    }
-    catch (Exception ex)
-    {
-        return BadRequest(new { message = "Erreur lors de la récupération des données.", error = ex.Message });
-    }
-}
+            return View("Configuration", model);
+        }
+[HttpPost]
 public IActionResult ConfigureGame(PetitBacGame model, string[] SelectedCategories)
 {
     try
     {
-        Console.WriteLine($"LobbyId: {model.LobbyId}");
-        Console.WriteLine($"Letter: {model.Letter}");
-        Console.WriteLine($"EndCondition: {model.EndCondition}");
-        Console.WriteLine($"SelectedCategories: {string.Join(", ", SelectedCategories)}");
-
-        // Charger le lobby
+        // Charger le lobby depuis la base de données
         var lobby = _context.Lobby.FirstOrDefault(l => l.Id == model.LobbyId);
         if (lobby == null)
         {
@@ -58,6 +53,7 @@ public IActionResult ConfigureGame(PetitBacGame model, string[] SelectedCategori
             return NotFound("Lobby introuvable.");
         }
 
+        // Associer le lobby au jeu
         model.Lobby = lobby;
 
         // Ajouter les catégories sélectionnées
@@ -80,37 +76,6 @@ public IActionResult ConfigureGame(PetitBacGame model, string[] SelectedCategori
     }
 }
 
-
-
-[HttpGet]
-public IActionResult GetGameConfiguration(int gameId)
-{
-    // Récupérer le jeu avec ses catégories et ses informations
-    var game = _context.PetitBacGames
-        .Include(g => g.Categories)
-        .FirstOrDefault(g => g.Id == gameId);
-
-    if (game == null)
-    {
-        return NotFound("Jeu introuvable.");
     }
-
-    // Retourner la configuration à la vue
-    return View(game);
-}
-
-
-
- [HttpGet]
-        public IActionResult test(int gameId, int playerId)
-        {
-            // Passer les valeurs gameId et playerId à la vue
-            ViewBag.GameId = gameId;
-            ViewBag.PlayerId = playerId;
-
-            // Renvoyer la vue GetGameConfiguration
-            return View("GetGameConfiguration");
-        }
     }
-}
     

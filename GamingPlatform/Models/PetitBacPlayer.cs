@@ -1,5 +1,6 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 
 namespace GamingPlatform.Models
@@ -8,19 +9,26 @@ namespace GamingPlatform.Models
     {
         public int Id { get; set; } // Identifiant unique du joueur
         public string Name { get; set; } // Nom du joueur
+        public string Pseudo { get; set; }
 
-        // Réponses pour toutes les catégories dans une partie (non mappé directement à la base)
+        // Réponses pour toutes les catégories dans une partie (non mappées directement à la base)
         [NotMapped]
         public Dictionary<string, string> Responses { get; set; } = new Dictionary<string, string>();
 
-        // Propriété pour stocker le dictionnaire en base sous forme de JSON
+        // Stockage des réponses sous forme de JSON dans la base de données
         public string ResponsesJson
         {
-            get => JsonSerializer.Serialize(Responses);
+            get => JsonSerializer.Serialize(Responses, new JsonSerializerOptions { WriteIndented = false });
             set => Responses = string.IsNullOrEmpty(value)
                 ? new Dictionary<string, string>()
-                : JsonSerializer.Deserialize<Dictionary<string, string>>(value);
+                : JsonSerializer.Deserialize<Dictionary<string, string>>(value, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
+
+        public int Score { get; set; } = 0; // Score du joueur pour la partie
+        public bool IsReady { get; set; } = false; // Indique si le joueur est prêt pour commencer
+
+        // Date d'inscription à la partie
+        public DateTime JoinedAt { get; set; } = DateTime.Now;
 
         // Relation avec PetitBacGame
         public int PetitBacGameId { get; set; } // Clé étrangère vers la partie
