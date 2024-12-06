@@ -1,4 +1,5 @@
 @model GamingPlatform.Models.PetitBacGame
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -21,7 +22,16 @@
                             </tr>
                             <tr>
                                 <th scope="row">Lettre Sélectionnée</th>
-                                <td>@Model.Letter</td>
+                                <td>
+                                    @if (Model.Letters != null && Model.Letters.Any())
+                                    {
+                                        @string.Join(", ", Model.Letters)
+                                    }
+                                    else
+                                    {
+                                        <span>Aucune lettre sélectionnée</span>
+                                    }
+                                </td>
                             </tr>
                             <tr>
                                 <th scope="row">Condition d'Arrêt</th>
@@ -51,10 +61,10 @@
                                     </ul>
                                 </td>
                             </tr>
-                             <tr>
+                            <tr>
                                 <th scope="row">Lien pour Inviter les Joueurs</th>
                                 <td>
-                                              <!--  d'alerte personnalisé pour le copier -->
+                                    <!-- Alerte de copie personnalisée -->
                                     <div id="copyAlert" class="alert alert-success" style="display: none;"></div>
                                     <div class="input-group">
                                         <input id="playerLink" type="text" class="form-control" value="@ViewBag.LinkPlayer2" readonly />
@@ -69,7 +79,7 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>c
+                </div>
                 <div class="card-footer text-center">
                     <a href="/PetitBac/Lobby?lobbyId=@Model.LobbyId" class="btn btn-success btn-lg px-4">Suivre l'évolution</a>
                 </div>

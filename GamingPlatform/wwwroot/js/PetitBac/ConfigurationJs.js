@@ -58,6 +58,26 @@ if (endConditionDropdown.value === "TimeLimit") {
     }
 }
 
+//Validation des lettres 
+document.getElementById("configureGameForm").addEventListener("submit", function (event) {
+    // Récupérer toutes les cases à cocher
+    const letterCheckboxes = document.querySelectorAll("input[name='SelectedLetters']");
+    const errorElement = document.getElementById("lettersError");
+
+    // Vérifier si au moins une case est cochée
+    const isChecked = Array.from(letterCheckboxes).some(checkbox => checkbox.checked);
+
+    if (!isChecked) {
+        // Afficher le message d'erreur et empêcher la soumission
+        errorElement.classList.remove("d-none");
+        errorElement.innerText = "Vous devez sélectionner au moins une lettre.";
+        event.preventDefault();
+    } else {
+        // Masquer le message d'erreur si la validation est correcte
+        errorElement.classList.add("d-none");
+    }
+});
+   
 // Validation des catégories
 const selectedCategories = Array.from(categoryCheckboxes).filter(checkbox => checkbox.checked);
 if (selectedCategories.length < 3) {

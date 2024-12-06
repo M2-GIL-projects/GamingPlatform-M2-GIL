@@ -22,7 +22,16 @@
                             </tr>
                             <tr>
                                 <th scope="row">Lettre Sélectionnée</th>
-                                <td>@Model.Letter</td>
+                                <td>
+                                    @if (Model.Letters != null && Model.Letters.Any())
+                                    {
+                                        @string.Join(", ", Model.Letters)
+                                    }
+                                    else
+                                    {
+                                        <span>Aucune lettre sélectionnée</span>
+                                    }
+                                </td>
                             </tr>
                             <tr>
                                 <th scope="row">Condition d'Arrêt</th>
@@ -58,7 +67,9 @@
                                 <div class="mb-4">
                                     <label for="Pseudo" class="form-label">Entrez votre Pseudo</label>
                                     <input type="text" class="form-control" id="Pseudo" name="pseudo" required />
-                                    <small class="text-danger d-none" id="pseudoError" style="font-size: 14px; font-weight: bold;">Le pseudo doit contenir au moins 5 caractères et commencer par une lettre.</small>
+                                    <small class="text-danger d-none" id="pseudoError" style="font-size: 14px; font-weight: bold;">
+                                        Le pseudo doit contenir au moins 5 caractères et commencer par une lettre.
+                                    </small>
                                 </div>
                             </form>
                         </tbody>
@@ -73,4 +84,3 @@
 </div>
 
 <script src="~/js/PetitBac/RejoindreJoueur.js"></script>
-

@@ -28,7 +28,7 @@ namespace GamingPlatform.Controllers
             var model = new PetitBacGame
             {
                 LobbyId = lobbyId,
-                Letter = 'A', // Lettre par défaut
+                Letters = new List<char> { 'A' }, 
                 PlayerCount = 2, // Par défaut, 2 joueurs
                 CreatorPseudo = "", // Par défaut, pseudo vide
                 Categories = _context.PetitBacCategories.ToList(), // Charger les catégories disponibles
@@ -42,7 +42,7 @@ namespace GamingPlatform.Controllers
         }
 
     [HttpPost]
-public IActionResult ConfigureGame(PetitBacGame model, string[] SelectedCategories)
+public IActionResult ConfigureGame(PetitBacGame model, string[] SelectedCategories, string[] SelectedLetters)
 {
     try
     {
@@ -56,6 +56,16 @@ public IActionResult ConfigureGame(PetitBacGame model, string[] SelectedCategori
 
         // Associer le lobby au jeu
         model.Lobby = lobby;
+         // Validation des lettres
+        if (SelectedLetters == null || SelectedLetters.Length == 0)
+        {
+            ModelState.AddModelError("Letters", "Vous devez sélectionner au moins une lettre.");
+            return View("Configuration", model);
+        }
+
+        // Ajouter les lettres sélectionnées
+        model.Letters.AddRange(SelectedLetters.Select(l => l[0]));
+
 
         // Validation des catégories
         if (SelectedCategories == null || SelectedCategories.Length == 0)

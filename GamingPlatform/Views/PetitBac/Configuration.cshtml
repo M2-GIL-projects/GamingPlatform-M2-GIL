@@ -17,16 +17,22 @@
             <input type="number" class="form-control" id="PlayerCount" name="PlayerCount" value="@Model.PlayerCount" min="2" required />
         </div>
 
-        <!-- Sélection de la Lettre -->
+       <!-- Sélection des Lettres -->
+    
         <div class="mb-4">
-            <label for="Letter" class="form-label">Lettre</label>
-            <select class="form-select" id="Letter" name="Letter" required>
+            <label class="form-label">Sélectionnez les Lettres :</label>
+            <div class="d-flex flex-wrap">
                 @foreach (var letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
                 {
-                    <option value="@letter" selected="@(Model.Letter == letter)">@letter</option>
+                    <div class="form-check me-3">
+                        <input class="form-check-input" type="checkbox" id="letter_@letter" name="SelectedLetters" value="@letter" />
+                        <label class="form-check-label" for="letter_@letter">@letter</label>
+                    </div>
                 }
-            </select>
+            </div>
+            <small class="text-danger d-none" id="lettersError">Vous devez sélectionner au moins une lettre.</small>
         </div>
+
 
         <!-- Sélection des Catégories -->
         <div class="mb-4">

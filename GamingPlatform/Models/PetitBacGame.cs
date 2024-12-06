@@ -7,7 +7,7 @@ namespace GamingPlatform.Models
     public class PetitBacGame
     {
         public int Id { get; set; } // Identifiant unique de la partie
-        public char Letter { get; set; } // Lettre choisie pour la partie
+        public List<char> Letters { get; set; } = new List<char>();
         public string EndCondition { get; set; } // Condition d'arrêt
         public int? TimeLimit { get; set; } // Temps limite (optionnel)
         public bool IsGameStarted { get; set; } = false; // Indique si la partie a commencé
@@ -25,7 +25,10 @@ namespace GamingPlatform.Models
             "Pays", "Animaux", "Fruits", "Prénoms", "Villes", "Métiers",
             "Couleurs", "Sports", "Objets", "Plantes", "Marques",
             "Fleurs", "Langues", "Instruments de musique", "Films",
-            "Séries", "Livres", "Paysages", "Nourriture", "Boissons"
+            "Séries", "Livres", "Paysages", "Nourriture", "Boissons",
+            "Vêtements", "Personnages célèbres", "Desserts", "Appareils électroniques", 
+            "Monuments célèbres", "Jeux vidéo", "Personnages historiques",
+            "Danses", "Fêtes ou célébrations"
         };
 
         // Liste des joueurs associés à la partie
