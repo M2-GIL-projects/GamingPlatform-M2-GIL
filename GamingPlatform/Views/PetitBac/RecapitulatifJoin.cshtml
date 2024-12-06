@@ -1,0 +1,76 @@
+@model GamingPlatform.Models.PetitBacGame
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Carte de récapitulatif -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3>Récapitulatif de la Partie : Petit Bac</h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="mb-4">Détails de la Partie :</h4>
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th scope="row" style="width: 40%;">Pseudo du Créateur</th>
+                                <td>@Model.CreatorPseudo</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Nombre de Joueurs</th>
+                                <td>@Model.PlayerCount</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Lettre Sélectionnée</th>
+                                <td>@Model.Letter</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Condition d'Arrêt</th>
+                                <td>
+                                    @if (Model.EndCondition == "TimeLimit")
+                                    {
+                                        <span>Limite de Temps</span>
+                                        @if (Model.TimeLimit.HasValue)
+                                        {
+                                            <span> - @Model.TimeLimit minutes</span>
+                                        }
+                                    }
+                                    else if (Model.EndCondition == "AllPlayersDone")
+                                    {
+                                        <span>Lorsque tous les joueurs ont terminé</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Catégories Sélectionnées</th>
+                                <td>
+                                    <ul class="list-group">
+                                        @foreach (var category in Model.Categories)
+                                        {
+                                            <li class="list-group-item">@category.Name</li>
+                                        }
+                                    </ul>
+                                </td>
+                            </tr>
+                            <form id="joinForm" method="post" asp-action="RegisterPlayer">
+                                <input type="hidden" name="gameId" value="@Model.Id" />
+                                <div id="alertMessage" class="alert alert-danger" style="display: none;"></div>
+                                <div class="mb-4">
+                                    <label for="Pseudo" class="form-label">Entrez votre Pseudo</label>
+                                    <input type="text" class="form-control" id="Pseudo" name="pseudo" required />
+                                    <small class="text-danger d-none" id="pseudoError" style="font-size: 14px; font-weight: bold;">Le pseudo doit contenir au moins 5 caractères et commencer par une lettre.</small>
+                                </div>
+                            </form>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer text-center">
+                    <button type="button" id="joinButton" class="btn btn-success btn-lg px-4">Rejoindre la partie</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/PetitBac/RejoindreJoueur.js"></script>
+

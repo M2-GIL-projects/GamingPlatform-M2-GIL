@@ -79,6 +79,15 @@ namespace GamingPlatform.Data
                 .WithMany(g => g.Categories)
                 .HasForeignKey(c => c.PetitBacGameId);
 
+
+            // Relation entre PetitBacGame et PetitBacPlayer
+            modelBuilder.Entity<PetitBacPlayer>()
+                .HasOne(p => p.PetitBacGame)
+                .WithMany(g => g.Players)
+                .HasForeignKey(p => p.PetitBacGameId);
+
+
+
             base.OnModelCreating(modelBuilder);
 
 

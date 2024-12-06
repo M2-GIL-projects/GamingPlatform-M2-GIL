@@ -87,6 +87,13 @@ app.MapControllerRoute(
     pattern: "game/play/{id:guid}",
     defaults: new { controller = "Game", action = "Play" });
 
+app.MapControllerRoute(
+    name: "recapitulatif",
+    pattern: "PetitBac/Recapitulatif/{gameId}",
+    defaults: new { controller = "PetitBac", action = "Recapitulatif" }
+);
+
+
 // Redirection pour le speed Typing game
 app.MapHub<SpeedTypingGameHub>("/SpeedTypingGame");
 

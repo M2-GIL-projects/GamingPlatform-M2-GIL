@@ -1,0 +1,80 @@
+@model GamingPlatform.Models.PetitBacGame
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Carte de récapitulatif -->
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3>Récapitulatif de la Partie : Petit Bac</h3>
+                </div>
+                <div class="card-body">
+                    <h4 class="mb-4">Détails de la Partie :</h4>
+                    <table class="table table-striped">
+                        <tbody>
+                            <tr>
+                                <th scope="row" style="width: 40%;">Pseudo du Créateur</th>
+                                <td>@Model.CreatorPseudo</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Nombre de Joueurs</th>
+                                <td>@Model.PlayerCount</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Lettre Sélectionnée</th>
+                                <td>@Model.Letter</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Condition d'Arrêt</th>
+                                <td>
+                                    @if (Model.EndCondition == "TimeLimit")
+                                    {
+                                        <span>Limite de Temps</span>
+                                        @if (Model.TimeLimit.HasValue)
+                                        {
+                                            <span> - @Model.TimeLimit minutes</span>
+                                        }
+                                    }
+                                    else if (Model.EndCondition == "AllPlayersDone")
+                                    {
+                                        <span>Lorsque tous les joueurs ont terminé</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Catégories Sélectionnées</th>
+                                <td>
+                                    <ul class="list-group">
+                                        @foreach (var category in Model.Categories)
+                                        {
+                                            <li class="list-group-item">@category.Name</li>
+                                        }
+                                    </ul>
+                                </td>
+                            </tr>
+                             <tr>
+                                <th scope="row">Lien pour Inviter les Joueurs</th>
+                                <td>
+                                              <!--  d'alerte personnalisé pour le copier -->
+                                    <div id="copyAlert" class="alert alert-success" style="display: none;"></div>
+                                    <div class="input-group">
+                                        <input id="playerLink" type="text" class="form-control" value="@ViewBag.LinkPlayer2" readonly />
+                                        <button class="btn btn-outline-secondary" id="copyButton" type="button" style="margin-left: 20px;">
+                                            Copier
+                                        </button>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Copiez ce lien et partagez-le avec les autres joueurs pour qu'ils rejoignent la partie.
+                                    </small>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>c
+                <div class="card-footer text-center">
+                    <a href="/PetitBac/Lobby?lobbyId=@Model.LobbyId" class="btn btn-success btn-lg px-4">Suivre l'évolution</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/js/PetitBac/Rejoindre.js"></script>

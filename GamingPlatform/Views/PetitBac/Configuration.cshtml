@@ -51,7 +51,7 @@
                     }
                 }
             </div>
-            <small class="text-danger d-none" id="categoryError">Vous devez sélectionner au moins une catégorie.</small>
+                <small class="text-danger d-none" id="categoryError">Vous devez sélectionner au moins 3 catégories.</small>
         </div>
 
         <!-- Condition d'Arrêt -->
@@ -73,110 +73,9 @@
 
         <!-- Bouton de soumission -->
         <div class="d-flex justify-content-center mb-5">
-            <button type="submit" class="btn btn-primary btn-lg px-5" id="submitButton">Lancer la Partie</button>
+            <button type="submit" class="btn btn-success btn-lg px-4" id="submitButton">Continuer</button>
         </div>
     </form>
 </div>
-
-
-    <style>
-    .categories-column {
-        display: flex;
-        flex-direction: column;
-        gap: 10px; /* Espacement entre les éléments */
-    }
-    .d-flex {
-        display: flex;
-        flex-wrap: wrap; /* Permet le retour à la ligne si les colonnes dépassent la largeur */
-        gap: 15px; /* Espacement entre les colonnes */
-    }
-    </style>
-
-
-    @section Scripts {
-    <script>
-        // Gérer l'affichage dynamique du champ "Temps Limite"
-        document.addEventListener("DOMContentLoaded", function () {
-            const endConditionDropdown = document.getElementById('EndCondition');
-            const timeLimitSection = document.getElementById('TimeLimitSection');
-
-            // Fonction pour afficher/masquer le champ Temps Limite
-            const toggleTimeLimitSection = () => {
-                if (endConditionDropdown.value === 'TimeLimit') {
-                    timeLimitSection.style.display = 'block';
-                } else {
-                    timeLimitSection.style.display = 'none';
-                }
-            };
-
-            // Initialiser l'état lors du chargement
-            toggleTimeLimitSection();
-
-            // Ajouter un écouteur sur le changement de valeur
-            endConditionDropdown.addEventListener('change', toggleTimeLimitSection);
-        });
- 
-
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.getElementById("configureGameForm");
-        const pseudoInput = document.getElementById("CreatorPseudo");
-        const timeLimitInput = document.getElementById("TimeLimit");
-        const endConditionDropdown = document.getElementById("EndCondition");
-        const categoriesContainer = document.getElementById("categoriesContainer");
-        const categoryCheckboxes = document.querySelectorAll(".category-checkbox");
-
-        const pseudoError = document.getElementById("pseudoError");
-        const timeLimitError = document.getElementById("timeLimitError");
-        const categoryError = document.getElementById("categoryError");
-
-        const toggleTimeLimitSection = () => {
-            const timeLimitSection = document.getElementById("TimeLimitSection");
-            if (endConditionDropdown.value === "TimeLimit") {
-                timeLimitSection.style.display = "block";
-            } else {
-                timeLimitSection.style.display = "none";
-            }
-        };
-
-        endConditionDropdown.addEventListener("change", toggleTimeLimitSection);
-        toggleTimeLimitSection();
-
-        form.addEventListener("submit", function (e) {
-            let isValid = true;
-
-            // Validation du pseudo
-            if (pseudoInput.value.trim() === "") {
-                pseudoError.classList.remove("d-none");
-                isValid = false;
-            } else {
-                pseudoError.classList.add("d-none");
-            }
-
-            // Validation du temps limite si TimeLimit est sélectionné
-            if (endConditionDropdown.value === "TimeLimit" && (timeLimitInput.value === "" || parseInt(timeLimitInput.value) < 1)) {
-                timeLimitError.classList.remove("d-none");
-                isValid = false;
-            } else {
-                timeLimitError.classList.add("d-none");
-            }
-
-            // Validation des catégories
-            const atLeastOneChecked = Array.from(categoryCheckboxes).some(checkbox => checkbox.checked);
-            if (!atLeastOneChecked) {
-                categoryError.classList.remove("d-none");
-                isValid = false;
-            } else {
-                categoryError.classList.add("d-none");
-            }
-
-            // Empêche l'envoi si le formulaire n'est pas valide
-            if (!isValid) {
-                e.preventDefault();
-            }
-        });
-    });
-</script>
-}
-
-</div>
+<link rel="stylesheet" href="~/css/petitBac/ConfigurationStyle.css">
+<script src="~/js/PetitBac/ConfigurationJs.js"></script>
