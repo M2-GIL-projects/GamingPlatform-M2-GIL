@@ -2,6 +2,8 @@
 using GamingPlatform.Services;
 using Microsoft.EntityFrameworkCore;
 using GamingPlatform.Models;
+using GamingPlatform.Data;
+
 
 namespace GamingPlatform.Controllers
 {
@@ -10,12 +12,14 @@ namespace GamingPlatform.Controllers
         private readonly LobbyService _lobbyService;
         private readonly GameService _gameService;
         private readonly PlayerService _playerService;
+        private readonly GamingPlatformContext _context;
 
-        public LobbyController(LobbyService lobbyService, GameService gameService, PlayerService playerService)
+        public LobbyController(LobbyService lobbyService, GameService gameService, PlayerService playerService, GamingPlatformContext context)
         {
             _lobbyService = lobbyService;
             _gameService = gameService;
             _playerService = playerService;
+            _context = context;
         }
 
         public async Task<IActionResult> Index(string? name, string? gameCode, LobbyStatus? status)
@@ -179,25 +183,69 @@ namespace GamingPlatform.Controllers
             return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> JoinLobby(Guid id)
-        {
-            var lobby = _lobbyService.GetLobbyById(id);
+       // [HttpGet]
+       // public async Task<IActionResult> JoinLobby(Guid id)
+        //{
+          //  var lobby = _lobbyService.GetLobbyById(id);
 
-            if (lobby == null)
-            {
-                return NotFound();
-            }
+            //if (lobby == null)
+            //{
+              //  return NotFound();
+            //}
 
             // Logique pour ajouter un joueur au lobby
-            var player = await GetCurrentPlayer();
-            if (player != null)
-            {
+            //var player = await GetCurrentPlayer();
+            //if (player != null)
+            //{
                 // Ajouter le joueur au lobby
-                _lobbyService.AddPlayerToLobby(id, player.Id);
-            }
+              //  _lobbyService.AddPlayerToLobby(id, player.Id);
+            //}
 
-            return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
-        }
+            //return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
+        //}
+    //}
+//}
+
+
+[HttpGet]
+public async Task<IActionResult> JoinLobby(Guid id)
+{
+    // Récupérer le lobby par son ID
+    var lobby = _lobbyService.GetLobbyById(id);
+
+    if (lobby == null)
+    {
+        return NotFound("Lobby introuvable.");
     }
+
+    // Récupérer le joueur actuel
+    var player = await GetCurrentPlayer();
+    if (player != null)
+    {
+        // Ajouter le joueur au lobby
+        _lobbyService.AddPlayerToLobby(id, player.Id);
+    }
+
+    // Vérifier le GameCode pour déterminer le type de jeu
+    if (lobby.GameCode == "PTB")
+    {
+        // Récupérer le jeu Petit Bac associé au lobby
+        var game = _context.PetitBacGames
+            .Include(g => g.Categories)
+            .Include(g => g.Players)
+            .FirstOrDefault(g => g.LobbyId == lobby.Id);
+
+        if (game == null)
+        {
+            return NotFound("Partie Petit Bac introuvable.");
+        }
+
+        // Rediriger vers la page RecapitulatifJoin
+        return View("RecapitulatifJoin", game);
+    }
+
+    // Redirection standard pour les autres jeux
+    return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
 }
+    }
+    }

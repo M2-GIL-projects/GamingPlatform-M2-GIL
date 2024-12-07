@@ -1,0 +1,44 @@
+@model PlayViewModel
+
+<div class="container mt-5">
+    <h1 class="text-center mb-5">Petit Bac : Partie en cours</h1>
+
+    <form method="post" asp-action="SubmitAnswers" class="mb-5">
+        <input type="hidden" name="gameId" value="@Model.GameId" />
+        <input type="hidden" name="playerId" value="@Model.PlayerId" />
+
+        @foreach (var letter in Model.Letters)
+        {
+            <div class="mb-4">
+                <h3 class="text-primary">Lettre : @letter</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <th class="text-center">@category</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <td class="text-center">
+                                        <input type="text" name="answers[@letter][@category]" 
+                                               class="form-control" placeholder="Votre réponse" />
+                                    </td>
+                                }
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-success btn-lg px-5">Soumettre mes réponses</button>
+        </div>
+    </form>
+</div>

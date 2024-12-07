@@ -1,5 +1,5 @@
 @model IEnumerable<GamingPlatform.Models.Lobby>
-
+<script src="/js/petitBac/link.js"></script>
 @{
     ViewData["Title"] = "Liste des Lobbies";
 }
@@ -7,9 +7,9 @@
 <div class="container mt-4">
     <h1 class="mb-4">Liste des Lobbies</h1>
 
-    <!-- Bouton pour ouvrir le modal de création de lobby -->
+    <!-- Bouton pour ouvrir le modal de crï¿½ation de lobby -->
     <a type="button" class="btn btn-success mb-4" href="/lobby/create/select">
-        Créer un Nouveau Lobby
+        Crï¿½er un Nouveau Lobby
     </a>
     <!-- Section de Filtres -->
     <div class="card mb-4">
@@ -58,7 +58,7 @@
                     <th>Jeu</th>
                     <th>Statut</th>
                     <th>Type</th>
-                    <th>Date de Création</th>
+                    <th>Date de Crï¿½ation</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -72,7 +72,7 @@
                             <td>@lobby.Name</td>
                             <td>@lobby.Game?.Name</td>
                             <td>@lobby.Status</td>
-                            <td>@(lobby.IsPrivate ? "Privé" : "Public")</td>
+                            <td>@(lobby.IsPrivate ? "Privï¿½" : "Public")</td>
                             <td>@lobby.CreatedAt.ToString("g")</td>
                             <td>
                                 <a class="btn btn-sm btn-info" href="/Lobby/Details/@lobby.Id">Rejoindre</a>
@@ -85,7 +85,7 @@
 
                 {
                     <tr>
-                        <td colspan="6" class="text-center">Aucun lobby trouvé.</td>
+                        <td colspan="6" class="text-center">Aucun lobby trouvï¿½.</td>
                     </tr>
                 }
             </tbody>

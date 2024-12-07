@@ -4,6 +4,7 @@ using GamingPlatform.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GamingPlatform.Migrations
 {
     [DbContext(typeof(GamingPlatformContext))]
-    partial class GamingPlatformContextModelSnapshot : ModelSnapshot
+    [Migration("20241205134537_newattributgameandplayerpetitbac")]
+    partial class newattributgameandplayerpetitbac
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,32 @@ namespace GamingPlatform.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("GamingPlatform.Models.Answer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PetitBacPlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Response")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PetitBacPlayerId");
+
+                    b.ToTable("Answer");
+                });
 
             modelBuilder.Entity("GamingPlatform.Models.Game", b =>
                 {
@@ -153,9 +182,9 @@ namespace GamingPlatform.Migrations
                     b.Property<bool>("IsGameStarted")
                         .HasColumnType("bit");
 
-                    b.PrimitiveCollection<string>("Letters")
+                    b.Property<string>("Letter")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(1)");
 
                     b.Property<Guid>("LobbyId")
                         .HasColumnType("uniqueidentifier");
@@ -188,6 +217,10 @@ namespace GamingPlatform.Migrations
                     b.Property<DateTime>("JoinedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("PetitBacGameId")
                         .HasColumnType("int");
 
@@ -197,14 +230,11 @@ namespace GamingPlatform.Migrations
 
                     b.Property<string>("ResponsesJson")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("Responses");
 
                     b.Property<int>("Score")
                         .HasColumnType("int");
-
-                    b.Property<string>("SessionToken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -280,6 +310,17 @@ namespace GamingPlatform.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Sentences");
+                });
+
+            modelBuilder.Entity("GamingPlatform.Models.Answer", b =>
+                {
+                    b.HasOne("GamingPlatform.Models.PetitBacPlayer", "PetitBacPlayer")
+                        .WithMany()
+                        .HasForeignKey("PetitBacPlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PetitBacPlayer");
                 });
 
             modelBuilder.Entity("GamingPlatform.Models.Lobby", b =>
