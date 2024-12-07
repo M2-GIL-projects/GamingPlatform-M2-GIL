@@ -21,10 +21,9 @@ namespace GamingPlatform.Data
         public DbSet<Score> Score { get; set; }
         public DbSet<Sentence> Sentences { get; set; }
         public DbSet<PetitBacGame> PetitBacGames { get; set; }
-        public DbSet<Answer> Answers { get; set; }
-        public DbSet<PetitBacPlayer> PetitBacPlayer { get; set; }
+        public DbSet<PetitBacPlayer> PetitBacPlayer { get; set; }      
         public DbSet<PetitBacCategory> PetitBacCategories { get; set; }
-        public DbSet<Answer> Answer { get; set; }
+      
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -60,32 +59,11 @@ namespace GamingPlatform.Data
                 .HasOne(pbg => pbg.Lobby)
                 .WithOne(l => l.PetitBacGame)
                 .HasForeignKey<PetitBacGame>(pbg => pbg.LobbyId);
-
-            // Configuration pour PetitBacPlayer et PetitBacGame (relation un-à-plusieurs)
+            
             modelBuilder.Entity<PetitBacPlayer>()
                 .HasOne(pbp => pbp.PetitBacGame)
                 .WithMany(pbg => pbg.Players)
                 .HasForeignKey(pbp => pbp.PetitBacGameId);
-
-            // Mapping pour ResponsesJson
-            modelBuilder.Entity<PetitBacPlayer>()
-                .Property(pbp => pbp.ResponsesJson)
-                .HasColumnName("Responses")
-                .HasColumnType("nvarchar(max)");
-
-
-            modelBuilder.Entity<PetitBacCategory>()
-                .HasOne(c => c.PetitBacGame)
-                .WithMany(g => g.Categories)
-                .HasForeignKey(c => c.PetitBacGameId);
-
-
-            // Relation entre PetitBacGame et PetitBacPlayer
-            modelBuilder.Entity<PetitBacPlayer>()
-                .HasOne(p => p.PetitBacGame)
-                .WithMany(g => g.Players)
-                .HasForeignKey(p => p.PetitBacGameId);
-
 
 
             base.OnModelCreating(modelBuilder);

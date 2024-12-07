@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using GamingPlatform.Models;
+using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace GamingPlatform.Models
 {

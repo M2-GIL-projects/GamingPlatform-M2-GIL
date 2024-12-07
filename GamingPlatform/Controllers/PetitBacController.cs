@@ -119,7 +119,6 @@ public IActionResult Recapitulatif(int gameId)
 }
     
 
-
 [HttpGet]
 public IActionResult Join(string code)
 {
@@ -142,44 +141,44 @@ public IActionResult Join(string code)
         return NotFound("Partie introuvable.");
     }
 
+    // Vérifier si le nombre maximal de joueurs est atteint
+    if (game.Players.Count >= game.PlayerCount)
+    {
+        TempData["Error"] = "Le nombre maximal de joueurs pour cette partie a été atteint.";
+        return RedirectToAction("ErrorPage"); // Rediriger vers une page d'erreur ou afficher un message
+    }
+
     // Passer les détails du jeu à la vue
+    ViewBag.GameId = game.Id;
     return View("RecapitulatifJoin", game);
 }
-
 [HttpPost]
 public IActionResult RegisterPlayer(int gameId, string pseudo)
 {
-    // Charger le jeu
+    // Rechercher ou créer une partie
     var game = _context.PetitBacGames.FirstOrDefault(g => g.Id == gameId);
-
     if (game == null)
     {
-        return NotFound("Partie introuvable.");
+        return NotFound("Jeu introuvable.");
     }
 
-    if (string.IsNullOrWhiteSpace(pseudo))
-    {
-        ModelState.AddModelError("Pseudo", "Le pseudo est requis.");
-        return View("RecapitulatifJoin", game);
-    }
-
-    // Ajouter le joueur
+    // Créer un joueur avec un token unique
     var player = new PetitBacPlayer
     {
         Pseudo = pseudo,
-        PetitBacGameId = game.Id,
-        JoinedAt = DateTime.Now
+        PetitBacGameId = gameId,
+        SessionToken = Guid.NewGuid().ToString() // Génération du token
     };
 
+    // Ajouter le joueur dans la base
     _context.PetitBacPlayer.Add(player);
     _context.SaveChanges();
 
-    return RedirectToAction("Recapitulatif", new { gameId = game.Id });
+    // Construire l'URL avec le sessionToken
+    string url = $"/PlayPetitBac/Play?gameId={gameId}&sessionToken={player.SessionToken}";
+
+    // Rediriger le joueur vers la page de jeu
+    return Redirect(url);
 }
-    }
-}
-
-
-
-
-
+    }}
+    

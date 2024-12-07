@@ -6,32 +6,45 @@
 
         <!-- Pseudo du Créateur -->
         <div class="mb-4">
-            <label for="CreatorPseudo" class="form-label">Pseudo du Créateur</label>
+            <label for="CreatorPseudo" class="form-label">Pseudo du Créateur :</label>
             <input type="text" class="form-control" id="CreatorPseudo" name="CreatorPseudo" value="@Model.CreatorPseudo" required />
             <small class="text-danger d-none" id="pseudoError">Le pseudo ne peut pas être vide.</small>
         </div>
 
         <!-- Nombre de Joueurs -->
         <div class="mb-4">
-            <label for="PlayerCount" class="form-label">Nombre de Joueurs</label>
+            <label for="PlayerCount" class="form-label">Nombre de Joueurs :</label>
             <input type="number" class="form-control" id="PlayerCount" name="PlayerCount" value="@Model.PlayerCount" min="2" required />
         </div>
 
        <!-- Sélection des Lettres -->
-    
-        <div class="mb-4">
-            <label class="form-label">Sélectionnez les Lettres :</label>
-            <div class="d-flex flex-wrap">
-                @foreach (var letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-                {
-                    <div class="form-check me-3">
-                        <input class="form-check-input" type="checkbox" id="letter_@letter" name="SelectedLetters" value="@letter" />
-                        <label class="form-check-label" for="letter_@letter">@letter</label>
-                    </div>
-                }
-            </div>
-            <small class="text-danger d-none" id="lettersError">Vous devez sélectionner au moins une lettre.</small>
+    <div class="mb-4">
+    <label class="form-label">Sélectionnez les Lettres :</label>
+    <div class="d-flex flex-wrap">
+        <!-- Première ligne de lettres -->
+        <div class="w-100 d-flex justify-content-center mb-2">
+            @foreach (var letter in "ABCDEFGHIJKLM")
+            {
+                <div class="form-check me-3">
+                    <input class="form-check-input" type="checkbox" id="letter_@letter" name="SelectedLetters" value="@letter" />
+                    <label class="form-check-label" for="letter_@letter">@letter</label>
+                </div>
+            }
         </div>
+        <!-- Deuxième ligne de lettres -->
+        <div class="w-100 d-flex justify-content-center">
+            @foreach (var letter in "NOPQRSTUVWXYZ")
+            {
+                <div class="form-check me-3">
+                    <input class="form-check-input" type="checkbox" id="letter_@letter" name="SelectedLetters" value="@letter" />
+                    <label class="form-check-label" for="letter_@letter">@letter</label>
+                </div>
+            }
+        </div>
+    </div>
+    <small class="text-danger d-none" id="lettersError">Vous devez sélectionner au moins une lettre.</small>
+</div>
+
 
 
         <!-- Sélection des Catégories -->

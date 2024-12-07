@@ -8,21 +8,21 @@ namespace GamingPlatform.Models
     public class PetitBacPlayer
     {
         public int Id { get; set; } // Identifiant unique du joueur
-        public string Name { get; set; } // Nom du joueur
-        public string Pseudo { get; set; }
-
-        // Réponses pour toutes les catégories dans une partie (non mappées directement à la base)
-        [NotMapped]
-        public Dictionary<string, string> Responses { get; set; } = new Dictionary<string, string>();
+        public string Pseudo { get; set; } // Pseudo du joueur
+         // Jeton unique pour sécuriser l'accès à la session du joueur
+        public string SessionToken { get; set; } = Guid.NewGuid().ToString();
 
         // Stockage des réponses sous forme de JSON dans la base de données
-        public string ResponsesJson
-        {
-            get => JsonSerializer.Serialize(Responses, new JsonSerializerOptions { WriteIndented = false });
-            set => Responses = string.IsNullOrEmpty(value)
-                ? new Dictionary<string, string>()
-                : JsonSerializer.Deserialize<Dictionary<string, string>>(value, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-        }
+        [NotMapped]
+        public Dictionary<char, Dictionary<string, string>> Responses { get; set; }
+
+public string ResponsesJson
+{
+    get => JsonSerializer.Serialize(Responses);
+    set => Responses = string.IsNullOrEmpty(value)
+        ? new Dictionary<char, Dictionary<string, string>>()
+        : JsonSerializer.Deserialize<Dictionary<char, Dictionary<string, string>>>(value);
+}
 
         public int Score { get; set; } = 0; // Score du joueur pour la partie
         public bool IsReady { get; set; } = false; // Indique si le joueur est prêt pour commencer
