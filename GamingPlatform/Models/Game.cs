@@ -6,7 +6,7 @@ namespace GamingPlatform.Models
         public string Name { get; set; }
 
         [System.ComponentModel.DataAnnotations.Required]
-        public string Code { get; set; } // Utilisé pour reconnaître le jeu à lancer
+        public string Code { get; set; } // Utilisï¿½ pour reconnaï¿½tre le jeu ï¿½ lancer
         public string Description { get; set; }
         public string? ImageUrl { get; set; }
     }

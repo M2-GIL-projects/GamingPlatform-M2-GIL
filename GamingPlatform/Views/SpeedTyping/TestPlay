@@ -1,28 +1,88 @@
 @page
+@model GamingPlatform.Models.PlayViewModel
 @{
-    ViewData["Title"] = "Speed Typing Game";
+    ViewData["Title"] = "SpeedTyping";
 }
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Speed Typing Game</title>
+    <title>Speed Typing</title>
     <style>
-        #textToType { font-size: 18px; margin-bottom: 20px; }
-        #userInput { width: 100%; height: 100px; }
-        #progress { width: 100%; height: 20px; background-color: #ddd; }
-        #progressBar { height: 100%; width: 0%; transition: width 0.3s; }
-        #stats { margin-top: 20px; }
-        #timer { font-size: 24px; font-weight: bold; }
-        #chat { margin-top: 20px; }
-        #messages { height: 200px; overflow-y: scroll; border: 1px solid #ddd; }
+        #textToType {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        #userInput {
+            width: 100%;
+            height: 100px;
+        }
+
+        #progress {
+            width: 100%;
+            height: 20px;
+            background-color: #ddd;
+        }
+
+        #progressBar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        #stats {
+            margin-top: 20px;
+        }
+
+        #timer {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #chat {
+            margin-top: 20px;
+        }
+
+        #messages {
+            height: 200px;
+            overflow-y: scroll;
+            border: 1px solid #ddd;
+        }
     </style>
 </head>
+
 <body>
-    <select id="difficulty">
-        <option value="Easy">Easy</option>
-        <option value="Medium" selected>Medium</option>
-        <option value="Hard">Hard</option>
-    </select>
+   @if (Model != null)
+   {
+       if (Model.Lobby != null)
+       {
+           <h2>Lobby: @(Model.Lobby.Id.ToString())</h2>
+           if (Model.PlayerIds != null && Model.PlayerIds.Any())
+           {
+               <h3>Players: @(string.Join(", ", Model.PlayerIds))</h3>
+           }
+           else
+           {
+               <h3>Aucun joueur dans ce lobby.</h3>
+           }
+
+           <select id="difficulty">
+               <option value="Easy">Easy</option>
+               <option value="Medium">Medium</option>
+               <option value="Hard">Hard</option>
+           </select>
+       }
+       else
+       {
+           <p>Le lobby est null.</p>
+       }
+   }
+   else
+   {
+       <p>Le modèle est null.</p>
+   }
+
     <button onclick="startGame()">Start Game</button>
     <div id="timer"></div>
     <div id="textToType"></div>
@@ -40,7 +100,7 @@
         <button onclick="sendMessage()">Send</button>
     </div>
 
-    <script src="/lib/signalr/signalr.min.js"></script>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
     <script>
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/speedTypingHub")
@@ -48,6 +108,12 @@
 
         let timeLeft;
         let timerInterval;
+
+        connection.on("GameDetails", (lobbyId, players, difficulty) => {
+            document.getElementById("lobbyId").innerText = `Lobby: ${lobbyId}`;
+            document.getElementById("players").innerText = `Players: ${players.join(", ")}`;
+            document.getElementById("difficulty").value = difficulty;
+        });
 
         connection.on("GameStarted", (text, timeLimit) => {
             document.getElementById("textToType").innerText = text;
@@ -84,7 +150,13 @@
 
         async function startGame() {
             const difficulty = document.getElementById("difficulty").value;
-            await connection.invoke("StartGame", difficulty);
+            const lobbyId = "@Model.Lobby.Id"; // Use the ID from the model
+            await connection.invoke("StartGame", lobbyId, difficulty);
+        }
+
+        async function getLobbyDetails() {
+            const lobbyId = "@Model.Lobby.Id"; // Use the ID from the model
+            await connection.invoke("GetGameDetails", lobbyId);
         }
 
         async function updateProgress() {
@@ -117,7 +189,9 @@
 
         connection.start().then(() => {
             console.log("Connected to hub");
+            connection.invoke("GetGameDetails");
         });
     </script>
 </body>
+
 </html>

@@ -115,7 +115,7 @@ namespace GamingPlatform.Controllers
             }
             try
             {
-                var lobby = _lobbyService.CreateLobby(name, gameId, isPrivate, playerId ,password);
+                var lobby = _lobbyService.CreateLobby(name, gameId, isPrivate, playerId, password);
                 return RedirectToAction("Details", new { id = lobby.Id });
             }
             catch (Exception ex)
@@ -131,13 +131,20 @@ namespace GamingPlatform.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("Lobby/Start/{id}")]
         public IActionResult Start(Guid id)
         {
-            _lobbyService.StartGame(id);
-
-            return Ok();
+            try
+            {
+                _lobbyService.StartGame(id);
+                return Ok("Le jeu a été démarré avec succès.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Une erreur est survenue : {ex.Message}");
+            }
         }
+
 
         public async Task<Player> GetCurrentPlayer()
         {
@@ -199,5 +206,8 @@ namespace GamingPlatform.Controllers
 
             return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
         }
+
     }
+
+
 }

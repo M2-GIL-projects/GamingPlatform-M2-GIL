@@ -107,7 +107,7 @@ function loadLobbies() {
 }
 
 // Charge les lobbies toutes les 10 secondes
-setInterval(loadLobbies, 10000);
+//setInterval(loadLobbies, 10000);
 
 
 // recuperer les top joueurs
@@ -128,6 +128,6 @@ function loadTopPlayers() {
     });
 }
 // Actualiser l’historique toutes les 30 secondes
-setInterval(loadTopPlayers, 30000);
+//setInterval(loadTopPlayers, 30000);
 
 

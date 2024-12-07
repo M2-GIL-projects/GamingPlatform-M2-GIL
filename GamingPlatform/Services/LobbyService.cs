@@ -1,5 +1,9 @@
 ﻿using GamingPlatform.Data;
+using GamingPlatform.Hubs;
 using GamingPlatform.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace GamingPlatform.Services
@@ -7,10 +11,12 @@ namespace GamingPlatform.Services
     public class LobbyService
     {
         private readonly GamingPlatformContext _context;
+        private readonly IServiceProvider _serviceProvider;
 
-        public LobbyService(GamingPlatformContext context)
+        public LobbyService(GamingPlatformContext context, IServiceProvider serviceProvider)
         {
             _context = context;
+            _serviceProvider = serviceProvider;
         }
 
         // Crée un nouveau lobby.
@@ -131,22 +137,56 @@ namespace GamingPlatform.Services
             _context.SaveChanges();
         }
 
+       
+
+
         //
-        public void StartGame(Guid lobbyId)
+        public IActionResult StartGame(Guid lobbyId)
         {
-            var lobby = GetLobbyWithGameAndPlayers(lobbyId);
-            if (lobby == null)
+            try
             {
-                throw new Exception("Lobby introuvable");
-            }
+                var lobby = GetLobbyWithGameAndPlayers(lobbyId);
 
-            if (lobby.Status != LobbyStatus.Waiting)
+                if (lobby == null)
+                {
+                    return new NotFoundObjectResult("Lobby introuvable");
+                }
+
+                if (lobby.Status != LobbyStatus.Waiting)
+                {
+                    return new BadRequestObjectResult("Le lobby n'est pas en attente.");
+                }
+
+                lobby.Status = LobbyStatus.InProgress;
+                UpdateLobby(lobby);
+                string redirectUrl = null;
+                switch (lobby.Code)
+                {
+                    case "SPT":
+                        {
+                            var hubContext = _serviceProvider.GetRequiredService<IHubContext<SpeedTypingHub>>();
+                            var speedTypingGame = new SpeedTyping(hubContext);
+                            speedTypingGame.InitializeBoard();
+
+                            lobby.Game.Name = "SpeedTyping";
+                            UpdateLobby(lobby);
+
+                            hubContext.Clients.Group(lobbyId.ToString()).SendAsync("GameStarted", speedTypingGame.TextToType, speedTypingGame.TimeLimit);
+                            
+                            redirectUrl = $"/Game/SpeedTyping/Play/{lobbyId}";
+                            return new OkObjectResult("Partie de Speed Typing démarrée");
+                        }
+
+                    default:
+                        return new BadRequestObjectResult($"Le type de jeu avec le code {lobby.Code} n'est pas pris en charge.");
+                }
+            }
+            catch (Exception ex)
             {
-                throw new Exception("Le lobby n'est pas en attente.");
+                return new ObjectResult($"Une erreur est survenue : {ex.Message}") { StatusCode = 500 };
             }
-
-            lobby.Status = LobbyStatus.InProgress;
-            UpdateLobby(lobby);
         }
+
+
     }
 }

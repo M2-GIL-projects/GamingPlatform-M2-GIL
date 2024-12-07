@@ -2,6 +2,8 @@ using GamingPlatform.Hubs;
 using Microsoft.EntityFrameworkCore;
 using GamingPlatform.Data;
 using GamingPlatform.Services;
+using GamingPlatform.Models;
+using System.Collections.Concurrent;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<GamingPlatformContext>(options =>
@@ -9,16 +11,24 @@ builder.Services.AddDbContext<GamingPlatformContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+});
 builder.Services.AddScoped<GameService>();
 builder.Services.AddScoped<LobbyService>();
 builder.Services.AddScoped<PlayerService>();
 builder.Services.AddScoped<GameSeeder>();
 
+builder.Services.AddSingleton<SpeedTyping>();
+builder.Services.AddSingleton(new ConcurrentDictionary<string, string>());
+
+
+
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(90); // Durée de la session
-    options.Cookie.HttpOnly = true; // Sécuriser le cookie
+    options.IdleTimeout = TimeSpan.FromMinutes(90); // Durï¿½e de la session
+    options.Cookie.HttpOnly = true; // Sï¿½curiser le cookie
 });
 
 var app = builder.Build();
@@ -32,7 +42,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Initialiser les données
+// Initialiser les donnï¿½es
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -43,7 +53,7 @@ using (var scope = app.Services.CreateScope())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseSession(); 
+app.UseSession();
 
 app.UseRouting();
 
@@ -77,6 +87,6 @@ app.MapHub<ChatHub>("/chatHub");
 app.MapHub<LabyrinthHub>("/labyrinthHub");
 
 // Redirection pour le speed Typing game
-app.MapHub<SpeedTypingGameHub>("/SpeedTypingGame");
+app.MapHub<SpeedTypingHub>("/SpeedTypingHub");
 
 app.Run();

@@ -1,0 +1,273 @@
+@model GamingPlatform.Models.SimpleViewModel
+
+@{
+    ViewData["Title"] = "SpeedTyping";
+}
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeedTyping</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        #progressBar {
+            transition: width 0.3s;
+        }
+
+        #messages {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+
+        textarea#userInput {
+            resize: none;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <div class="container py-3">
+        <h1 class="text-center text-primary mb-4">SpeedTyping</h1>
+
+        <div class="row g-4">
+            <!-- Colonne 1: Jeu et Informations -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <!-- Détails du Lobby -->
+                            <h2 class="h5">Détails du Lobby</h2>
+                            <p><strong>LobbyID :</strong> @Model?.LobbyId ?? "LobbyId non défini"</p>
+                        </div>
+                        <div class="mb-4">
+                            <!-- Liste des Joueurs -->
+                            <h2 class="h5">Liste des Joueurs</h2>
+                            @if (Model?.PlayerPseudos != null && Model.PlayerPseudos.Any())
+                            {
+                                <ul class="list-group">
+                                    @foreach (var pseudo in Model.PlayerPseudos)
+                                    {
+                                        <li class="list-group-item">@pseudo</li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p class="text-muted">Aucun joueur n'est associé à ce lobby.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <!-- Paramètres et Progression -->
+                            <h2 class="h5">Paramètres du Jeu</h2>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <select id="difficulty" class="form-select">
+                                        <option value="Easy">Facile</option>
+                                        <option value="Medium">Moyen</option>
+                                        <option value="Hard">Difficile</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-primary w-100" onclick="startGame()">Lancer la
+                                        Partie</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <!-- Jeu: Texte et Barre de Progression -->
+                            <h2 class="h5">Progression</h2>
+                            <div id="timer" class="mb-3 fs-4 fw-bold text-center text-warning">00:00</div>
+                            <div id="textToType" class="bg-light p-3 border rounded mb-3" style="font-size: 18px;">
+                                <!-- Texte à taper -->
+                            </div>
+                            <textarea id="userInput" class="form-control mb-3" rows="4" oninput="updateProgress()"
+                                disabled placeholder="Tapez ici..."></textarea>
+                            <div id="progress" class="progress">
+                                <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Colonne 2: Chat -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h2 class="h5">Chat</h2>
+                        <div id="messages" class="rounded mb-3"></div>
+                        <div class="input-group">
+                            <input type="text" id="messageInput" class="form-control" placeholder="Tapez un message...">
+                            <button class="btn btn-primary" onclick="sendMessage()">Envoyer</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Statistiques -->
+                        <h2 class="h5">Statistiques</h2>
+                        <div class="row text-center">
+                            <div class="col">
+                                <strong>Vitesse</strong>
+                                <div id="wpm" class="fs-5">0</div>
+                                <small>Mots/min</small>
+                            </div>
+                            <div class="col">
+                                <strong>Précision</strong>
+                                <div id="accuracy" class="fs-5">0%</div>
+                                <small>Précision</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/SpeedTypingHub", {
+                skipNegotiation: true,
+                transport: signalR.HttpTransportType.WebSockets
+            })
+            .configureLogging(signalR.LogLevel.Debug)
+            .build();
+
+        let timeLeft;
+        let timerInterval;
+
+        connection.on("GameStarted", (text, timeLimit) => {
+            console.log(`Game started with text: ${text} and time limit: ${timeLimit}`);
+            document.getElementById("textToType").innerText = text;
+            document.getElementById("userInput").value = "";
+            document.getElementById("progressBar").style.width = "0%";
+            document.getElementById("userInput").disabled = false;
+            timeLeft = timeLimit;
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+        });
+
+        connection.on("ProgressUpdate", (isCorrect, progress, wpm, accuracy) => {
+            const progressBar = document.getElementById("progressBar");
+            progressBar.style.width = progress + "%";
+            progressBar.style.backgroundColor = isCorrect ? "green" : "red";
+            document.getElementById("wpm").innerText = wpm;
+            document.getElementById("accuracy").innerText = accuracy.toFixed(2);
+            if (!isCorrect) {
+                playErrorSound();
+            }
+        });
+
+        connection.on("GameOver", (leaderboard) => {
+            clearInterval(timerInterval);
+            document.getElementById("userInput").disabled = true;
+            let leaderboardText = leaderboard.map(p => `${p.playerId}: ${p.wpm} WPM, ${p.accuracy.toFixed(2)}% Accuracy`).join("\n");
+            alert("Game Over!\n\nLeaderboard:\n" + leaderboardText);
+        });
+
+
+        connection.on("ReceiveMessage", (pseudo, message) => {
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML += `<p><strong>${pseudo}:</strong> ${message}</p>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        });
+
+
+
+        async function startGame() {
+            try {
+                const difficulty = document.getElementById("difficulty").value;
+                if (!["Easy", "Medium", "Hard"].includes(difficulty)) {
+                    alert("Difficulté invalide !");
+                    return;
+                }
+
+                console.log(`difficulty=${difficulty}`);
+
+                //await connection.invoke("Ping");
+
+                await connection.invoke("StartGame", difficulty);
+                console.log("Game started successfully.");
+            } catch (error) {
+                console.error("Failed to start game:", error);
+                alert("Erreur lors du démarrage du jeu : " + (error.message || "Une erreur inconnue est survenue."));
+            }
+        }
+
+        async function updateProgress() {
+            const typedText = document.getElementById("userInput").value;
+            await connection.invoke("UpdateProgress", typedText);
+        }
+
+        function updateTimer() {
+            document.getElementById("timer").innerText = timeLeft;
+            if (timeLeft > 0) {
+                timeLeft--;
+            } else {
+                clearInterval(timerInterval);
+                connection.invoke("UpdateProgress", document.getElementById("userInput").value);
+            }
+        }
+
+        function playErrorSound() {
+            // Implement sound playing logic here
+            console.log("Error sound played");
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById("messageInput");
+            if (messageInput.value.trim() !== "") {
+                await connection.invoke("SendMessage", messageInput.value);
+                messageInput.value = "";
+            }
+        }
+
+       connection.start().then(() => {
+            console.log("Connection started");
+            const lobbyId = "@Model.LobbyId";
+            const playerPseudos = @Html.Raw(Json.Serialize(Model.PlayerPseudos));
+            
+            // Vérifier si le pseudo du joueur existe déjà dans le localStorage
+            let playerPseudo = localStorage.getItem('playerPseudo');
+            
+            if (!playerPseudo || !playerPseudos.includes(playerPseudo)) {
+                // Si le pseudo n'existe pas ou n'est pas dans la liste, demander à l'utilisateur d'en entrer un
+                playerPseudo = prompt("Entrez votre pseudo :", playerPseudos[0] || "");
+                
+                while (!playerPseudo || !playerPseudos.includes(playerPseudo)) {
+                    alert("Pseudo invalide ou non disponible. Veuillez réessayer.");
+                    playerPseudo = prompt("Entrez votre pseudo :", playerPseudos[0] || "");
+                }
+                
+                // Sauvegarder le nouveau pseudo dans le localStorage
+                localStorage.setItem('playerPseudo', playerPseudo);
+            }
+            
+            // Rejoindre le lobby avec le pseudo
+            connection.invoke("JoinLobby", lobbyId, playerPseudo).then(() => {
+                console.log(`${playerPseudo} a rejoint le lobby ${lobbyId}`);
+                connection.invoke("InitializeLobbyPlayers", lobbyId);
+            });
+        }).catch(err => console.error(err.toString()));
+
+    </script>
+</body>
+
+</html>

@@ -25,6 +25,7 @@ namespace GamingPlatform.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             // Contrainte d'unicité pour le champ Code dans Games
             modelBuilder.Entity<Game>()
                 .HasIndex(g => g.Code)
@@ -54,6 +55,6 @@ namespace GamingPlatform.Data
 
             base.OnModelCreating(modelBuilder);
         }
-            
+
     }
 }

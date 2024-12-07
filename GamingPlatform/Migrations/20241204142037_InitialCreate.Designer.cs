@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GamingPlatform.Migrations
 {
     [DbContext(typeof(GamingPlatformContext))]
-    [Migration("20241124191140_UpdateLobbyPlayer")]
-    partial class UpdateLobbyPlayer
+    [Migration("20241204142037_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
