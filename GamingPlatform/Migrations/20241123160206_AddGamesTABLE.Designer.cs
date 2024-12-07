@@ -4,6 +4,7 @@ using GamingPlatform.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GamingPlatform.Migrations
 {
     [DbContext(typeof(GamingPlatformContext))]
-    partial class GamingPlatformContextModelSnapshot : ModelSnapshot
+    [Migration("20241123160206_AddGamesTABLE")]
+    partial class AddGamesTABLE
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,9 +102,6 @@ namespace GamingPlatform.Migrations
                     b.Property<Guid>("LobbyId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("datetime2");
-
                     b.HasKey("PlayerId", "LobbyId");
 
                     b.HasIndex("LobbyId");
@@ -118,6 +118,7 @@ namespace GamingPlatform.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Pseudo")
@@ -184,7 +185,7 @@ namespace GamingPlatform.Migrations
                         .WithMany()
                         .HasForeignKey("GameCode")
                         .HasPrincipalKey("Code")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Game");

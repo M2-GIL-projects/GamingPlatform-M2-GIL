@@ -1,0 +1,94 @@
+@model IEnumerable<GamingPlatform.Models.Lobby>
+
+@{
+    ViewData["Title"] = "Liste des Lobbies";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Liste des Lobbies</h1>
+
+    <!-- Bouton pour ouvrir le modal de création de lobby -->
+    <a type="button" class="btn btn-success mb-4" href="/lobby/create/select">
+        Créer un Nouveau Lobby
+    </a>
+    <!-- Section de Filtres -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Filtres</h5>
+            <form id="filterForm" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="searchName" class="form-label">Nom du Lobby</label>
+                    <input type="text" class="form-control" id="searchName" name="name" placeholder="Rechercher par nom" />
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="filterGame" class="form-label">Jeu</label>
+                    <select class="form-control" id="filterGame" name="gameCode">
+                        <option value="">Tous les jeux</option>
+                        @foreach (var game in ViewBag.Games as IEnumerable<GamingPlatform.Models.Game>)
+                        {
+                            <option value="@game.Code">@game.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="filterStatus" class="form-label">Statut</label>
+                    <select class="form-control" id="filterStatus" name="status">
+                        <option value="">Tous les statuts</option>
+                        @foreach (var status in Enum.GetValues(typeof(GamingPlatform.Models.LobbyStatus)))
+
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <br />
+                    <button type="submit" class="btn btn-primary w-100">Filtrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Liste des Lobbies -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Nom</th>
+                    <th>Jeu</th>
+                    <th>Statut</th>
+                    <th>Type</th>
+                    <th>Date de Création</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+
+                {
+                    @foreach (var lobby in Model)
+                    {
+                        <tr>
+                            <td>@lobby.Name</td>
+                            <td>@lobby.Game?.Name</td>
+                            <td>@lobby.Status</td>
+                            <td>@(lobby.IsPrivate ? "Privé" : "Public")</td>
+                            <td>@lobby.CreatedAt.ToString("g")</td>
+                            <td>
+                                <a class="btn btn-sm btn-info" href="/Lobby/Details/@lobby.Id">Rejoindre</a>
+                            </td>
+                        </tr>
+                    }
+                }
+
+                else
+
+                {
+                    <tr>
+                        <td colspan="6" class="text-center">Aucun lobby trouvé.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

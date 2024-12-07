@@ -1,0 +1,103 @@
+﻿@model GamingPlatform.Models.Lobby
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header text-center">
+            <h1>Lobby: @Model.Name</h1>
+        </div>
+        <div class="card-body">
+            <!-- Information sur le jeu -->
+            <div class="mb-3">
+                @if (Model.Game != null)
+                {
+                    <p><strong>Jeu :</strong> @Model.Game.Name</p>
+                }
+                else
+                {
+                    <p class="text-danger"><strong>Jeu :</strong> Non spécifié</p>
+                }
+                <p>
+                    <strong>Status :</strong>
+                    @if (Model.Status == GamingPlatform.Models.LobbyStatus.Waiting)
+                    {
+                        <span class="badge bg-warning">En attente</span>
+                    }
+                    else if (Model.Status == GamingPlatform.Models.LobbyStatus.InProgress)
+                    {
+                        <span class="badge bg-success">En cours</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Terminé</span>
+                    }
+                </p>
+            </div>
+
+            <!-- Liste des joueurs -->
+            <h3 class="mt-4">Joueurs</h3>
+            <ul class="list-group">
+                @if (Model.LobbyPlayers != null && Model.LobbyPlayers.Any())
+                {
+                    @foreach (var lobbyPlayer in Model.LobbyPlayers)
+                    {
+                        if (lobbyPlayer.Player != null)
+                        {
+                            <li class="list-group-item">
+                                <strong>@lobbyPlayer.Player.Pseudo</strong> (@lobbyPlayer.Player.Name)
+                            </li>
+                        }
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item text-danger">Aucun joueur dans ce lobby.</li>
+                }
+            </ul>
+            <!-- Si le lobby est privé, afficher le lien d'invitation -->
+            @if (Model.IsPrivate)
+            {
+                    <div class="mt-4">
+                        <h4>Inviter un joueur :</h4>
+                        <p>Copiez et envoyez ce lien à vos amis pour les inviter dans ce lobby :</p>
+                        <input type="text" class="form-control" value=" @Url.Action("JoinPrivateLobby", "Lobby", new { id = Model.Id, password = Model.Password })" readonly />
+                    </div>
+            }
+
+            <!-- Actions basées sur le status -->
+            <div class="mt-4 text-center">
+                @if (Model.Status == GamingPlatform.Models.LobbyStatus.Waiting)
+                {
+                    <button class="btn btn-primary" onclick="startGame(@Model.Id)">Lancer le jeu</button>
+                }
+                else if (Model.Status == GamingPlatform.Models.LobbyStatus.InProgress)
+                {
+                    <a href="/Game/Play/@Model.Game.Code?lobbyId=@Model.Id" class="btn btn-success">
+                        Rejoindre le plateau de jeu
+                    </a>
+                }
+                else if (Model.Status == GamingPlatform.Models.LobbyStatus.Finished)
+                {
+                    <p class="text-muted">Ce lobby est terminé. Merci d'avoir joué !</p>
+                    <a href="/Lobby/Archive/@Model.Id" class="btn btn-secondary">Archiver</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function startGame(lobbyId) {
+            // Appeler une API pour changer le status à InProgress
+            fetch(`/Lobby/Start/${lobbyId}`, { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Le jeu a commencé. Redirection...');
+                        window.location.href = `/Game/Play/${lobbyId}`;
+                    } else {
+                        alert('Impossible de lancer le jeu. Réessayez plus tard.');
+                    }
+                });
+        }
+    </script>
+}

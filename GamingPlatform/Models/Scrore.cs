@@ -10,11 +10,5 @@ public class Score
     public DateTime Date { get; set; }
     public double TimeTaken { get; set; }
 
-    // Navigation properties
-    public int UserId { get; set; }
-    public Joueur Joueur { get; set; }
-
-    public Guid GameId { get; set; }
-    public Game Game { get; set; }
 }
 }

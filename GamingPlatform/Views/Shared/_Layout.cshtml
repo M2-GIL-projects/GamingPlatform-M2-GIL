@@ -26,20 +26,17 @@
                                 class="fas fa-home mr-1"></i>Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Games" asp-action="Categories"><i
-                                class="fas fa-th-large mr-1"></i>Catégories</a>
+                        <a class="nav-link" href="@Url.Action("Index", "Lobby")">
+                            <i class="fas fa-th-large mr-1"></i>Lobbies</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Games" asp-action="New"><i
-                                class="fas fa-star mr-1"></i>Nouveautés</a>
+                        <a class="nav-link" href="@Url.Action("Player", "Home")">
+                            <i class="fas fa-user-circle mr-1"></i>Compte
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Home" asp-action="Contact"><i
                                 class="fas fa-envelope mr-1"></i>Contact</a>
-                    </li>
-                     <li class="nav-item">
-                        <a asp-action="AddGame" class="nav-link" >Ajouter jeux</a>
-                         
                     </li>
                     
                 </ul>
@@ -48,7 +45,6 @@
     </nav>
 
     <main role="main" class="pb-3">
-        <br><br><br>
         @RenderBody()
     </main>
 
