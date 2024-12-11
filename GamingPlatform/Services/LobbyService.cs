@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using GamingPlatform.Hubs;
+using Microsoft.Data.SqlClient;
 
 namespace GamingPlatform.Services
 {
@@ -124,7 +125,7 @@ namespace GamingPlatform.Services
 
             if (lobby.LobbyPlayers.Any(lp => lp.PlayerId == playerId))
             {
-                throw new Exception("Le joueur est déjà dans le lobby.");
+                throw new PlayerAlreadyInLobbyException("Le joueur est déjà dans le lobby.");
             }
 
             var lobbyPlayer = new LobbyPlayer
@@ -184,4 +185,12 @@ namespace GamingPlatform.Services
             }
         }
     }
+}
+public class PlayerAlreadyInLobbyException : Exception
+{
+    public PlayerAlreadyInLobbyException() { }
+
+    public PlayerAlreadyInLobbyException(string message) : base(message) { }
+
+    public PlayerAlreadyInLobbyException(string message, Exception inner) : base(message, inner) { }
 }

@@ -2,6 +2,7 @@
 using GamingPlatform.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 
 namespace GamingPlatform.Controllers
 {
@@ -18,8 +19,17 @@ namespace GamingPlatform.Controllers
         {
             return View();
         }
-        public async Task<IActionResult> Maze()
+        public async Task<IActionResult> Maze(int rows = 10, int cols = 10)
         {
+            // Génération du labyrinthe
+            bool[,] adjacencyMatrix = await _labyrinthGenerator.GenerateLabyrinth(rows, cols);
+
+            // Sérialisation de la matrice d'adjacence en JSON pour l'utiliser dans la vue
+            var adjacencyJson = JsonConvert.SerializeObject(adjacencyMatrix);
+
+            // Transmettre le JSON à la vue
+            ViewBag.AdjacencyMatrix = adjacencyJson;
+
             return View();
         }
 

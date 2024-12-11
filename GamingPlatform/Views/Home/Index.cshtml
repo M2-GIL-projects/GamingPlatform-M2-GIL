@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<GamingPlatform.Models.Game>
 
 @{
-    ViewData["Title"] = "Accueil - JeuxHub";
+    ViewData["Title"] = "Accueil - GamingPlatform";
 }
 
 <div id="mainCarousel" class="carousel slide" data-ride="carousel">
@@ -12,15 +12,15 @@
     </ol>
     <div class="carousel-inner">
         <div class="carousel-item active">
-            <img src="https://picsum.photos/1200/400?random=1" class="d-block w-100 carousel-img" alt="Jeux en ligne">
+            <img src="~/images/slider/slider1.png" class="d-block w-100 carousel-img" alt="Jeux en ligne">
             <div class="carousel-caption d-none d-md-block">
-                <h2>Bienvenue sur JeuxHub</h2>
+                <h2>Bienvenue sur GamingPlatform</h2>
                 <p>Votre nouvelle plateforme de jeux en ligne sans inscription</p>
                 <a href="#games" class="btn btn-primary btn-lg">Découvrir nos jeux</a>
             </div>
         </div>
         <div class="carousel-item">
-            <img src="https://picsum.photos/1200/400?random=2" class="d-block w-100 carousel-img" alt="Multijoueur">
+            <img src="~/images/slider/slider2.png" class="d-block w-100 carousel-img" alt="Multijoueur">
             <div class="carousel-caption d-none d-md-block">
                 <h2>Jouez avec vos amis</h2>
                 <p>Créez ou rejoignez un lobby pour commencer à jouer</p>
@@ -28,7 +28,7 @@
             </div>
         </div>
         <div class="carousel-item">
-            <img src="https://picsum.photos/1200/400?random=3" class="d-block w-100 carousel-img" alt="Compétition">
+            <img src="~/images/slider/slider3.png" class="d-block w-100 carousel-img" alt="Compétition">
             <div class="carousel-caption d-none d-md-block">
                 <h2>Compétition et classements</h2>
                 <p>Consultez les meilleurs scores et relevez des défis</p>
@@ -63,10 +63,14 @@
             {
                 <div class="col-md-4 mb-4">
                     <div class="card game-card">
-                        <img src="@game.ImageUrl" class="card-img-top" alt="@game.Name">
+                        <img src="@game.ImageUrl" class="card-img-top img-fluid" style="max-height: 200px; object-fit: cover;" alt="@game.Name">
                         <div class="card-body text-center">
                             <h5 class="card-title">@game.Name</h5>
-                            <p class="card-text">@game.Description</p>
+                            <p class="card-text">
+                                @(game.Description.Length > 100
+                                    ? game.Description.Substring(0, 100) + "..."
+                                    : game.Description)
+                            </p>
                             <a href="/game/details/@game.Id" class="btn btn-primary">Jouer</a>
                         </div>
                     </div>

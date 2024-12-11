@@ -1,12 +1,25 @@
-﻿    <meta charset="UTF-8">
+﻿@{
+    Layout = null;  
+    var adjacencyMatrix = ViewBag.AdjacencyMatrix;
+}
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="~/css/labyrinth/labyrinth.css" asp-append-version="true" />
     <title>Labyrinth</title>
 <body>
     <div id="labyrinth">
-        <!-- Les divs .cell seront générées par JavaScript -->
-        <a href="@Url.Action("GenerateMaze", "labyrinth")" class="btn btn-primary btn-lg">Voir les lobbys</a>
     </div>
     <script src="~/js/signalr/dist/browser/signalr.js"></script>
     <script src="~/js/labyrinth/labyrinth.js"></script>
+    <script>
+    // Récupérer la matrice d'adjacence sérialisée depuis la vue Razor
+    const adjacency = JSON.parse('@Html.Raw(adjacencyMatrix)');
+
+    // Définir les dimensions du labyrinthe
+    const rows = 15;  // Vous pouvez ajuster ces valeurs
+    const cols = 15;  // Vous pouvez ajuster ces valeurs
+
+    // Appeler la fonction de génération du labyrinthe
+    generateLabyrinth(adjacency, rows, cols);
+</script>
 </body>

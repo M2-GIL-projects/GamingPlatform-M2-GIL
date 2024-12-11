@@ -11,10 +11,14 @@
     {
         <div class="col-md-4 mb-4">
             <div class="card">
-                <img src="@game.ImageUrl" class="card-img-top" alt="@game.Name" />
+                <img src="@game.ImageUrl" class="card-img-top img-fluid" style="max-height: 200px; object-fit: cover;" alt="@game.Name">
                 <div class="card-body">
                     <h5 class="card-title">@game.Name</h5>
-                    <p class="card-text">@game.Description</p>
+                    <p class="card-text">
+                                @(game.Description.Length > 100
+                                    ? game.Description.Substring(0, 100) + "..."
+                                    : game.Description)
+                    </p>
                     <a href="/game/details/@game.Id" class="btn btn-info">Voir les détails</a>
                 </div>
             </div>

@@ -2,6 +2,7 @@
 using GamingPlatform.Services;
 using Microsoft.EntityFrameworkCore;
 using GamingPlatform.Models;
+using Microsoft.Data.SqlClient;
 
 namespace GamingPlatform.Controllers
 {
@@ -66,11 +67,15 @@ namespace GamingPlatform.Controllers
 
         // Affiche un formulaire avec un select pour choisir un jeu
         [HttpGet]
-        public IActionResult CreateWithSelect()
+        public IActionResult CreateWithSelect(string? name, Guid? gameId, string? password, bool isPrivate = false)
         {
             // Récupérer tous les jeux pour la liste déroulante
             var games = _gameService.GetAvailableGames();
             ViewBag.Games = games;
+            ViewBag.GameName = name;
+            ViewBag.GameId = gameId;
+            ViewBag.IsPrivate = isPrivate;
+            ViewBag.Password = password;
             return View();
         }
 
@@ -83,6 +88,13 @@ namespace GamingPlatform.Controllers
             if (player != null)
             {
                 playerId = player.Id;
+            }
+            else
+            {
+                //Gérer la redirection pour obtenir l'utilisateur
+                var returnUrl = Url.Action("CreateWithSelect", "Lobby",
+                new { name, gameId, isPrivate, password }, Request.Scheme);
+                return RedirectToAction("Player", "Home", new { returnUrl });
             }
             try
             {
@@ -99,7 +111,7 @@ namespace GamingPlatform.Controllers
 
         // Crée un lobby à partir d'un jeu (le code du jeu est passé en paramètre)
         [HttpGet]
-        public IActionResult CreateFromGame(string gameCode)
+        public IActionResult CreateFromGame(string gameCode, string name, bool isPrivate, string? password)
         {
             var game = _gameService.GetGameByCode(gameCode);
             if (game == null)
@@ -107,6 +119,9 @@ namespace GamingPlatform.Controllers
                 return NotFound("Le jeu spécifié n'existe pas.");
             }
 
+            ViewBag.GameName = name;
+            ViewBag.IsPrivate = isPrivate;
+            ViewBag.Password = password;
             return View(game);
         }
 
@@ -119,6 +134,14 @@ namespace GamingPlatform.Controllers
             if (player != null)
             {
                 playerId = player.Id;
+            }
+            else
+            {
+                //Gérer la redirection pour obtenir l'utilisateur
+                String? gameCode = _gameService.GetGameById(gameId)?.Code;
+                var returnUrl = Url.Action("CreateFromGame", "Lobby",
+                new { gameCode, name, isPrivate, password }, Request.Scheme);
+                return RedirectToAction("Player", "Home", new { returnUrl });
             }
             try
             {
@@ -179,8 +202,29 @@ namespace GamingPlatform.Controllers
             var player = await GetCurrentPlayer();
             if (player != null)
             {
-                // Ajouter le joueur au lobby
-                _lobbyService.AddPlayerToLobby(id, player.Id);
+                try
+                {
+                    // Ajouter le joueur au lobby
+                    _lobbyService.AddPlayerToLobby(id, player.Id);
+                }
+                catch (PlayerAlreadyInLobbyException ex)
+                {
+                    // Gérer l'exception spécifique de joueur déjà dans le lobby
+                    return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
+                }
+                catch (Exception ex)
+                {
+                    // Gérer toute autre exception
+                    return RedirectToAction("Error", "Home");
+                }
+            }
+            else
+            {
+
+                //Gérer la redirection pour obtenir l'utilisateur
+                var returnUrl = Url.Action("JoinPrivateLobby", "Lobby",
+                new { id, password }, Request.Scheme);
+                return RedirectToAction("Player", "Home", new { returnUrl });
             }
 
             return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
@@ -200,8 +244,27 @@ namespace GamingPlatform.Controllers
             var player = await GetCurrentPlayer();
             if (player != null)
             {
-                // Ajouter le joueur au lobby
-                _lobbyService.AddPlayerToLobby(id, player.Id);
+                try
+                {
+                    // Ajouter le joueur au lobby
+                    _lobbyService.AddPlayerToLobby(id, player.Id);
+                }
+                catch (PlayerAlreadyInLobbyException ex)
+                {
+                    // Gérer l'exception spécifique de joueur déjà dans le lobby
+                    return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
+                }
+                catch (Exception ex)
+                {
+                    // Gérer toute autre exception
+                    return RedirectToAction("Error", "Home");
+                }
+            }
+            else
+            {
+                //Gérer la redirection pour obtenir l'utilisateur
+                var returnUrl = Url.Action("JoinLobby", "Lobby", new { id }, Request.Scheme);
+                return RedirectToAction("Player", "Home", new { returnUrl });
             }
 
             return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
@@ -221,11 +284,27 @@ namespace GamingPlatform.Controllers
             var player = await GetCurrentPlayer();
             if (player != null)
             {
-                // Ajouter le joueur au lobby
-                _lobbyService.AddPlayerToLobby(id, player.Id);
-            }else
+                try
+                {
+                    // Ajouter le joueur au lobby
+                    _lobbyService.AddPlayerToLobby(id, player.Id);
+                }
+                catch (PlayerAlreadyInLobbyException ex)
+                {
+                    // Gérer l'exception spécifique de joueur déjà dans le lobby
+                    return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
+                }
+                catch (Exception ex)
+                {
+                    // Gérer toute autre exception
+                    return RedirectToAction("Error", "Home");
+                }
+            }
+            else
             {
-                return RedirectToAction("Player", "Home");
+                //Gérer la redirection pour obtenir l'utilisateur
+                var returnUrl = Url.Action("JoinLobby", "Lobby", new { id }, Request.Scheme);
+                return RedirectToAction("Player", "Home", new { returnUrl });
             }
 
             return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
@@ -245,7 +324,9 @@ namespace GamingPlatform.Controllers
             var player = await GetCurrentPlayer();
             if (player == null)
             {
-                return RedirectToAction("Player", "Home");
+                //Gérer la redirection pour obtenir l'utilisateur
+                var returnUrl = Url.Action("ResumeLobby", "Lobby", new { id }, Request.Scheme);
+                return RedirectToAction("Player", "Home", new { returnUrl });
             }
 
             return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
