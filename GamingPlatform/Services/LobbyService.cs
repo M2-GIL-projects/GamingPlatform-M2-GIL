@@ -1,5 +1,9 @@
-﻿using GamingPlatform.Data;
+﻿﻿using GamingPlatform.Data;
+using GamingPlatform.Hubs;
 using GamingPlatform.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace GamingPlatform.Services
@@ -7,10 +11,12 @@ namespace GamingPlatform.Services
     public class LobbyService
     {
         private readonly GamingPlatformContext _context;
+        private readonly IServiceProvider _serviceProvider;
 
-        public LobbyService(GamingPlatformContext context)
+        public LobbyService(GamingPlatformContext context, IServiceProvider serviceProvider)
         {
             _context = context;
+            _serviceProvider = serviceProvider;
         }
 
         // Crée un nouveau lobby.
@@ -131,22 +137,55 @@ namespace GamingPlatform.Services
             _context.SaveChanges();
         }
 
+       
+
+
         //
-        public void StartGame(Guid lobbyId)
+        public IActionResult StartGame(Guid lobbyId)
+{
+    try
+    {
+        var lobby = GetLobbyWithGameAndPlayers(lobbyId);
+
+        if (lobby == null)
         {
-            var lobby = GetLobbyWithGameAndPlayers(lobbyId);
-            if (lobby == null)
-            {
-                throw new Exception("Lobby introuvable");
-            }
-
-            if (lobby.Status != LobbyStatus.Waiting)
-            {
-                throw new Exception("Le lobby n'est pas en attente.");
-            }
-
-            lobby.Status = LobbyStatus.InProgress;
-            UpdateLobby(lobby);
+            return new NotFoundObjectResult("Lobby introuvable");
         }
+
+        if (lobby.Status != LobbyStatus.Waiting)
+        {
+            return new BadRequestObjectResult("Le lobby n'est pas en attente.");
+        }
+
+        // Change le statut du lobby
+        lobby.Status = LobbyStatus.InProgress;
+        UpdateLobby(lobby);
+
+        string redirectUrl;
+
+        // Démarre le jeu en fonction du type
+        switch (lobby.Game.Code)
+        {
+            case "MOR": // Code pour Morpion
+                var hubContext = _serviceProvider.GetRequiredService<IHubContext<MorpionHub>>();
+                var morpion = new Morpion();
+                morpion.InitializeBoard();
+
+                // Notifie les joueurs via SignalR
+                hubContext.Clients.Group(lobbyId.ToString()).SendAsync("GameStarted", morpion.RenderBoard());
+
+                redirectUrl = $"/Game/Morpion/Play/{lobbyId}";
+                return new OkObjectResult(new { Message = "Partie de Morpion démarrée", RedirectUrl = redirectUrl });
+
+            default:
+                return new BadRequestObjectResult($"Le type de jeu avec le code {lobby.Game.Code} n'est pas pris en charge.");
+        }
+    }
+    catch (Exception ex)
+    {
+        return new ObjectResult($"Une erreur est survenue : {ex.Message}") { StatusCode = 500 };
+    }
+}
+
     }
 }

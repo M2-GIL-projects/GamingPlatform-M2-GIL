@@ -17,8 +17,8 @@ builder.Services.AddScoped<GameSeeder>();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(90); // Durée de la session
-    options.Cookie.HttpOnly = true; // Sécuriser le cookie
+    options.IdleTimeout = TimeSpan.FromMinutes(90); // Durï¿½e de la session
+    options.Cookie.HttpOnly = true; // Sï¿½curiser le cookie
 });
 
 var app = builder.Build();
@@ -32,7 +32,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// Initialiser les données
+// Initialiser les donnï¿½es
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

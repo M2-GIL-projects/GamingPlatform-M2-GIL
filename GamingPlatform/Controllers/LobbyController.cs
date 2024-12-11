@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿using Microsoft.AspNetCore.Mvc;
 using GamingPlatform.Services;
 using Microsoft.EntityFrameworkCore;
 using GamingPlatform.Models;
@@ -10,6 +10,8 @@ namespace GamingPlatform.Controllers
         private readonly LobbyService _lobbyService;
         private readonly GameService _gameService;
         private readonly PlayerService _playerService;
+
+         private readonly ILogger<LobbyController> _logger;
 
         public LobbyController(LobbyService lobbyService, GameService gameService, PlayerService playerService)
         {
@@ -41,14 +43,7 @@ namespace GamingPlatform.Controllers
 
             // Charger les jeux pour les filtres
             ViewBag.Games = _gameService.GetAvailableGames();
- 
-            int ? playerId = null;
-            var player = await GetCurrentPlayer();
-            if (player != null)
-            {
-                playerId = player.Id;
-            }
-            ViewBag.CurrentUserId = playerId;
+
             return View(lobbies);
         }
 
@@ -122,7 +117,7 @@ namespace GamingPlatform.Controllers
             }
             try
             {
-                var lobby = _lobbyService.CreateLobby(name, gameId, isPrivate, playerId ,password);
+                var lobby = _lobbyService.CreateLobby(name, gameId, isPrivate, playerId, password);
                 return RedirectToAction("Details", new { id = lobby.Id });
             }
             catch (Exception ex)
@@ -138,13 +133,20 @@ namespace GamingPlatform.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("Lobby/Start/{id}")]
         public IActionResult Start(Guid id)
         {
-            _lobbyService.StartGame(id);
-
-            return Ok();
+            try
+            {
+                _lobbyService.StartGame(id);
+                return Ok("Le jeu a été démarré avec succès.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Une erreur est survenue : {ex.Message}");
+            }
         }
+
 
         public async Task<Player> GetCurrentPlayer()
         {
@@ -202,32 +204,12 @@ namespace GamingPlatform.Controllers
             {
                 // Ajouter le joueur au lobby
                 _lobbyService.AddPlayerToLobby(id, player.Id);
-            }else
-            {
-                return RedirectToAction("Player", "Home");
             }
 
             return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ResumeLobby(Guid id)
-        {
-            var lobby = _lobbyService.GetLobbyById(id);
-
-            if (lobby == null)
-            {
-                return NotFound();
-            }
-
-            // Logique pour ajouter un joueur au lobby
-            var player = await GetCurrentPlayer();
-            if (player == null)
-            {
-                return RedirectToAction("Player", "Home");
-            }
-
-            return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
-        }
     }
+
+
 }
