@@ -1,6 +1,7 @@
 ﻿@{
     Layout = null;
     var lobbyId = ViewData["LobbyId"];
+    var playerPseudos = ViewData["PlayerPseudos"] as List<string>;
 }
 
 <!DOCTYPE html>
@@ -32,60 +33,81 @@
 </head>
 <body>
     <h1>Morpion</h1>
-    <h2>Lobby: @lobbyId</h2>
+    <h2>Lobby ID : @lobbyId</h2>
+    <h3>Joueurs :</h3>
+    <ul>
+        @foreach (var player in playerPseudos)
+        {
+            <li>@player</li>
+        }
+    </ul>
+
     <h3 id="currentPlayer">Joueur actuel : X</h3>
     <div id="board"></div>
     <p id="gameStatus"></p>
 
     <script>
-        const lobbyId = '@lobbyId';
-        const playerName = prompt("Entrez votre nom :");
+    const lobbyId = '@lobbyId';
+    const playerName = prompt("Entrez votre nom :");
+    let currentPlayer = "X"; // Début du jeu
 
-        // Connexion à SignalR
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/morpionHub")
-            .build();
+    // Connexion à SignalR
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/morpionHub")
+        .build();
 
-        // Rejoindre le lobby
-        connection.start().then(() => {
-            connection.invoke("JoinGame", lobbyId, playerName);
-        });
+    // Rejoindre le lobby
+    connection.start().then(() => {
+        connection.invoke("JoinGame", lobbyId, playerName);
+    });
 
-        // Écouter les événements du serveur
-        connection.on("PlayerJoined", (playerName) => {
-            console.log(playerName + " a rejoint le jeu !");
-        });
+    // Écouter les événements du serveur
+    connection.on("UpdateGame", (board, nextPlayer) => {
+        updateBoard(board);
+        currentPlayer = nextPlayer;
+        $("#currentPlayer").text("Joueur actuel : " + nextPlayer);
+    });
 
-        connection.on("UpdateGame", (board, currentPlayer) => {
-            $("#board").html(board);
-            $("#currentPlayer").text("Joueur actuel : " + currentPlayer);
-        });
+    connection.on("GameOver", (message) => {
+        $("#gameStatus").text(message);
+        alert(message);
+    });
 
-        connection.on("GameOver", (message) => {
-            $("#gameStatus").text(message);
-            alert(message);
-        });
+    connection.on("Error", (message) => {
+        alert("Erreur : " + message);
+    });
 
-        connection.on("Error", (message) => {
-            alert("Erreur : " + message);
-        });
+    // Gérer les clics sur les cases du plateau
+    function updateBoard(boardString) {
+        const rows = boardString.trim().split("\n");
+        $("#board").empty();
 
-        // Initialiser le plateau
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {
+        for (let i = 0; i < rows.length; i++) {
+            const cells = rows[i].trim().split(/\[|\]/).filter(Boolean);
+            for (let j = 0; j < cells.length; j++) {
+                const cellValue = cells[j] === " " ? "" : cells[j];
                 const cell = $("<div>")
                     .addClass("cell")
-                    .attr("data-x", i)
-                    .attr("data-y", j)
-                    .appendTo("#board");
+                    .text(cellValue)
+                    .data("x", i)
+                    .data("y", j)
+                    .toggleClass("taken", cellValue !== "");
 
-                cell.click(function () {
-                    const x = $(this).data("x");
-                    const y = $(this).data("y");
-                    connection.invoke("MakeMove", lobbyId, x, y, "X"); // Remplace "X" par le symbole du joueur actuel
-                });
+                if (cellValue === "") {
+                    cell.click(function () {
+                        connection.invoke("MakeMove", lobbyId, i, j, currentPlayer)
+                            .catch(err => console.error(err));
+                    });
+                }
+
+                $("#board").append(cell);
             }
         }
-    </script>
+    }
+
+    // Initialiser le plateau vide au chargement
+    updateBoard("[ ] [ ] [ ]\n[ ] [ ] [ ]\n[ ] [ ] [ ]");
+</script>
+
 </body>
 </html>

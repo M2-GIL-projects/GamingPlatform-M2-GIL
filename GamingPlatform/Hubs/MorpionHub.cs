@@ -22,33 +22,38 @@ namespace GamingPlatform.Hubs
         }
 
         public async Task MakeMove(string lobbyId, int x, int y, string playerSymbol)
+{
+    try
+    {
+        // Vérifie si le joueur actuel peut jouer
+        if (playerSymbol != CurrentPlayer)
         {
-            try
-            {
-                if (playerSymbol != CurrentPlayer)
-                {
-                    await Clients.Caller.SendAsync("Error", "Ce n'est pas votre tour !");
-                    return;
-                }
-
-                GameBoard.MakeMove(x, y, playerSymbol);
-
-                // Vérifie si le jeu est terminé
-                if (GameBoard.IsGameOver())
-                {
-                    await Clients.Group(lobbyId).SendAsync("GameOver", $"{playerSymbol} a gagné !");
-                }
-                else
-                {
-                    // Alterne entre les joueurs
-                    CurrentPlayer = CurrentPlayer == "X" ? "O" : "X";
-                    await Clients.Group(lobbyId).SendAsync("UpdateGame", GameBoard.RenderBoard(), CurrentPlayer);
-                }
-            }
-            catch (Exception ex)
-            {
-                await Clients.Caller.SendAsync("Error", ex.Message);
-            }
+            await Clients.Caller.SendAsync("Error", "Ce n'est pas votre tour !");
+            return;
         }
+
+        // Effectue le mouvement sur le plateau
+        GameBoard.MakeMove(x, y, playerSymbol);
+
+        // Vérifie si le jeu est terminé
+        if (GameBoard.IsGameOver())
+        {
+            await Clients.Group(lobbyId).SendAsync("GameOver", $"{playerSymbol} a gagné !");
+        }
+        else
+        {
+            // Alterne le joueur actuel
+            CurrentPlayer = CurrentPlayer == "X" ? "O" : "X";
+
+            // Notifie les clients du groupe avec le plateau mis à jour
+            await Clients.Group(lobbyId).SendAsync("UpdateGame", GameBoard.RenderBoard(), CurrentPlayer);
+        }
+    }
+    catch (Exception ex)
+    {
+        await Clients.Caller.SendAsync("Error", ex.Message);
+    }
+}
+
     }
 }
