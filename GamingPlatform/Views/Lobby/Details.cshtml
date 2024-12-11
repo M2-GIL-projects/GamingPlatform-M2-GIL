@@ -54,29 +54,38 @@
                 }
             </ul>
             <!-- Si le lobby est privé, afficher le lien d'invitation -->
-            @if (Model.IsPrivate)
-            {
-                    <div class="mt-4">
-                        <h4>Inviter un joueur :</h4>
-                        <p>Copiez et envoyez ce lien à vos amis pour les inviter dans ce lobby :</p>
+            <div class="mt-4">
+                <h4>Inviter un joueur :</h4>
+                <p>Copiez et envoyez ce lien à vos amis pour les inviter dans ce lobby :</p>
+                <div class="input-group">
                     <input type="text"
-                           class="form-control"
-                           value="@Url.Action("JoinPrivateLobby", "Lobby", new { id = Model.Id, password = Model.Password }, "https")"
-                           readonly />
-                    </div>
-            }
+                        class="form-control"
+                        id="inviteLink"
+                        value="@Url.Action(Model.IsPrivate ? "JoinPrivateLobby" : "JoinPublicLobby", "Lobby", Model.IsPrivate ? new { id = Model.Id, password = Model.Password } : new { id = Model.Id }, "http")"
+                        readonly />
+                    <button class="btn btn-outline-secondary" type="button" onclick="copyInviteLink()">Copier</button>
+                </div>
+            </div>
 
             <!-- Actions basées sur le status -->
             <div class="mt-4 text-center">
                 @if (Model.Status == GamingPlatform.Models.LobbyStatus.Waiting)
                 {
-                    <button class="btn btn-primary" onclick="startGame(@Model.Id)">Lancer le jeu</button>
+                    <button class="btn btn-primary" onclick="startGame('@Model.Id')">Lancer le jeu</button>
                 }
                 else if (Model.Status == GamingPlatform.Models.LobbyStatus.InProgress)
                 {
-                    <a href="/Game/Play/@Model.Game.Code?lobbyId=@Model.Id" class="btn btn-success">
+                    if(@Model.Game.Name== "SpeedTyping"){
+                        <a href="/Game/@Model.Game.Name/Play/@Model.Id" class="btn btn-success">
                         Rejoindre le plateau de jeu
                     </a>
+                    }else{
+                         <a href="/Game/Play/@Model.Game.Code?lobbyId=@Model.Id" class="btn btn-success">
+                        Rejoindre le plateau de jeu
+                    </a>
+                    }
+
+                   
                 }
                 else if (Model.Status == GamingPlatform.Models.LobbyStatus.Finished)
                 {
@@ -101,6 +110,14 @@
                         alert('Impossible de lancer le jeu. Réessayez plus tard.');
                     }
                 });
+        }
+
+        function copyInviteLink() {
+            var copyText = document.getElementById("inviteLink");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // Pour les appareils mobiles
+            document.execCommand("copy");
+            alert("Lien d'invitation copié !");
         }
     </script>
 }

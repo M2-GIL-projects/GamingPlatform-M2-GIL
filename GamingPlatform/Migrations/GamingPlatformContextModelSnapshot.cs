@@ -134,19 +134,33 @@ namespace GamingPlatform.Migrations
 
             modelBuilder.Entity("GamingPlatform.Models.Score", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double>("TimeTaken")
+                    b.Property<double>("Accuracy")
                         .HasColumnType("float");
 
-                    b.Property<int>("Value")
+                    b.Property<int>("AdjustedScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Difficulty")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("LobbyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PlayerPseudo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RawScore")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("WPM")
                         .HasColumnType("int");
 
                     b.HasKey("Id");

@@ -1,58 +1,272 @@
+using GamingPlatform.Data;
+using GamingPlatform.Models;
+using GamingPlatform.Services;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
 
 namespace GamingPlatform.Hubs
 {
-    public class SpeedTypingGameHub : Hub
+    public class SpeedTypingHub : Hub
     {
-        private static readonly ConcurrentDictionary<string, List<string>> LobbyPlayers = new();
-        public async Task UpdateProgress(string lobbyCode, string playerName, double progress)
+        private readonly SpeedTyping _game;
+        private readonly GamingPlatformContext _context;
+        private readonly LobbyService _lobbyService;
+        private readonly ILogger<SpeedTypingHub> _logger;
+        private readonly ConcurrentDictionary<string, string> _connectionToPseudo;
+
+        public SpeedTypingHub(
+            GamingPlatformContext context,
+            SpeedTyping game,
+            LobbyService lobbyService,
+            ILogger<SpeedTypingHub> logger,
+           ConcurrentDictionary<string, string> connectionToPseudo)
         {
-            // Envoyer la progression à tous les clients du groupe
-            await Clients.Group(lobbyCode).SendAsync("ReceiveProgress", playerName, progress);
+            _game = game ?? throw new ArgumentNullException(nameof(game));
+            _lobbyService = lobbyService ?? throw new ArgumentNullException(nameof(lobbyService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _connectionToPseudo = connectionToPseudo ?? throw new ArgumentNullException(nameof(connectionToPseudo));
+            _logger.LogInformation("SpeedTypingHub instantiated successfully.");
+            _context = context;
         }
 
-        public async Task JoinLobby(string lobbyCode)
+        public async Task StartGame(string difficulty)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyCode);
-        }
-
-        public async Task LeaveLobby(string lobbyCode)
-        {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, lobbyCode);
-        }
-
-        public async Task JoinGame(string lobbyCode, string playerName)
-        {
-            // Ajouter le joueur au lobby s'il n'est pas encore présent
-            if (!LobbyPlayers.ContainsKey(lobbyCode))
+            if (Enum.TryParse<Difficulty>(difficulty, true, out Difficulty parsedDifficulty))
             {
-                LobbyPlayers[lobbyCode] = new List<string>();
-            }
-
-            LobbyPlayers[lobbyCode].Add(playerName);
-
-            // Envoyer la liste des joueurs actuels aux clients du lobby
-            await Clients.Group(lobbyCode).SendAsync("PlayerJoined", new { username = playerName });
-
-            // Ajouter le joueur à un groupe de SignalR
-            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyCode);
-        }
-
-        public override async Task OnDisconnectedAsync(Exception exception)
-        {
-            foreach (var lobby in LobbyPlayers)
-            {
-                if (lobby.Value.Contains(Context.ConnectionId))
+                try
                 {
-                    lobby.Value.Remove(Context.ConnectionId);
-                    break;
+                    _logger.LogInformation("Starting game with difficulty: {Difficulty}", parsedDifficulty);
+                    _game.InitializeBoard(parsedDifficulty);
+                    _logger.LogInformation("Game initialized with text: {TextToType} and time limit: {TimeLimit}", _game.TextToType, _game.TimeLimit);
+                    await Clients.All.SendAsync("GameStarted", _game.TextToType, _game.TimeLimit);
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Unhandled exception in StartGame for difficulty: {Difficulty}", parsedDifficulty);
+                    throw;
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Invalid difficulty received: {Difficulty}", difficulty);
+                throw new ArgumentException("Invalid difficulty", nameof(difficulty));
+            }
+        }
+
+        public async Task JoinLobby(string lobbyId, string pseudo)
+        {
+            if (string.IsNullOrWhiteSpace(lobbyId)) throw new ArgumentNullException(nameof(lobbyId));
+            if (string.IsNullOrWhiteSpace(pseudo)) throw new ArgumentNullException(nameof(pseudo));
+
+            try
+            {
+                // Associer le pseudo à la connexion
+                _connectionToPseudo[Context.ConnectionId] = pseudo;
+
+                // Ajouter la connexion au groupe
+                await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+
+                // Associer le lobby au contexte
+                Context.Items["LobbyId"] = lobbyId;
+
+                _logger.LogInformation("Player '{Pseudo}' joined lobby '{LobbyId}'", pseudo, lobbyId);
+                await Clients.Group(lobbyId).SendAsync("PlayerJoined", pseudo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding player '{Pseudo}' to lobby '{LobbyId}'", pseudo, lobbyId);
+                throw;
+            }
+        }
+
+
+        public async Task<string> ValidatePseudo(string lobbyId, string pseudo)
+        {
+            if (string.IsNullOrWhiteSpace(lobbyId) || string.IsNullOrWhiteSpace(pseudo))
+                throw new ArgumentNullException("Lobby ID or Pseudo cannot be null.");
+
+            try
+            {
+                var lobby = _lobbyService.GetLobbyWithGameAndPlayers(Guid.Parse(lobbyId));
+                if (lobby == null)
+                {
+                    _logger.LogWarning("Lobby not found for ID: {LobbyId}", lobbyId);
+                    return "invalid"; // Lobby non trouvé
+                }
+
+                // Vérifiez si le pseudo est déjà associé à cette connexion
+                var currentPseudo = _connectionToPseudo.GetValueOrDefault(Context.ConnectionId);
+                _logger.LogInformation("Current pseudo for connection '{ConnectionId}': {CurrentPseudo}", Context.ConnectionId, currentPseudo);
+
+                if (!string.IsNullOrWhiteSpace(currentPseudo))
+                {
+                    if (currentPseudo.Equals(pseudo, StringComparison.OrdinalIgnoreCase))
+                    {
+                        _logger.LogInformation("Pseudo '{Pseudo}' is the same as the current pseudo for connection '{ConnectionId}'", pseudo, Context.ConnectionId);
+                        return "same"; // Même pseudo
+                    }
+                }
+
+                // Vérifier si le pseudo existe déjà dans le lobby
+                var isPseudoInLobby = lobby.LobbyPlayers.Any(lp => lp.Player.Pseudo.Equals(pseudo, StringComparison.OrdinalIgnoreCase));
+                _logger.LogInformation("Pseudo '{Pseudo}' validation result for lobby '{LobbyId}': {IsValid}", pseudo, lobbyId, isPseudoInLobby);
+
+                return isPseudoInLobby ? "valid" : "invalid"; // Valide ou invalide
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating pseudo '{Pseudo}' for lobby '{LobbyId}'", pseudo, lobbyId);
+                throw;
+            }
+        }
+
+
+        public async Task InitializeLobbyPlayers(string lobbyId)
+        {
+            if (string.IsNullOrWhiteSpace(lobbyId)) throw new ArgumentNullException(nameof(lobbyId));
+
+            try
+            {
+                var lobby = _lobbyService.GetLobbyWithGameAndPlayers(Guid.Parse(lobbyId));
+                if (lobby != null)
+                {
+                    foreach (var lobbyPlayer in lobby.LobbyPlayers)
+                    {
+                        if (lobbyPlayer.Player != null)
+                        {
+                            _connectionToPseudo[Context.ConnectionId] = lobbyPlayer.Player.Pseudo;
+                            await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
+                        }
+                    }
+                    _logger.LogInformation("Initialized players for lobby '{LobbyId}'", lobbyId);
+                }
+                else
+                {
+                    _logger.LogWarning("Lobby not found for ID: {LobbyId}", lobbyId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initializing players for lobby '{LobbyId}'", lobbyId);
+                throw;
+            }
+        }
+
+        public async Task ChangeDifficulty(string difficulty)
+        {
+            if (Enum.TryParse<Difficulty>(difficulty, true, out Difficulty parsedDifficulty))
+            {
+                try
+                {
+                    var lobbyId = Context.Items["LobbyId"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(lobbyId))
+                        throw new InvalidOperationException("Lobby ID not found in connection context.");
+
+                    _logger.LogInformation("Changing difficulty to {Difficulty} for lobby {LobbyId}", parsedDifficulty, lobbyId);
+
+                    // Diffuse la difficulté à tous les membres du lobby
+                    await Clients.Group(lobbyId).SendAsync("DifficultyChanged", difficulty);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error changing difficulty to {Difficulty}", difficulty);
+                    throw;
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Invalid difficulty received: {Difficulty}", difficulty);
+                throw new ArgumentException("Invalid difficulty", nameof(difficulty));
+            }
+        }
+
+
+        public async Task UpdateProgress(string typedText)
+        {
+            try
+            {
+                await _game.CheckProgress(Context.ConnectionId, typedText);
+                _logger.LogInformation("Progress updated for connection '{ConnectionId}'", Context.ConnectionId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating progress for connection '{ConnectionId}'", Context.ConnectionId);
+                throw;
+            }
+        }
+
+        public async Task SendMessage(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message)) throw new ArgumentNullException(nameof(message));
+
+            try
+            {
+                string pseudo = _connectionToPseudo.GetValueOrDefault(Context.ConnectionId, "Unknown");
+                await Clients.All.SendAsync("ReceiveMessage", pseudo, message);
+                _logger.LogInformation("Message sent from '{Pseudo}': {Message}", pseudo, message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending message from '{ConnectionId}'", Context.ConnectionId);
+                throw;
+            }
+        }
+
+        public override async Task OnConnectedAsync()
+        {
+            try
+            {
+                if (Context.ConnectionId == null)
+                {
+                    _logger.LogWarning("ConnectionId null detected.");
+                    throw new InvalidOperationException("Client not connected.");
+                }
+
+                _logger.LogInformation("Client connected: {ConnectionId}", Context.ConnectionId);
+                await base.OnConnectedAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during client connection: {ConnectionId}", Context.ConnectionId);
+                throw;
+            }
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            if (_connectionToPseudo.TryRemove(Context.ConnectionId, out var pseudo))
+            {
+                _logger.LogInformation("Client déconnecté : {ConnectionId}, Pseudo : {Pseudo}", Context.ConnectionId, pseudo);
             }
 
             await base.OnDisconnectedAsync(exception);
         }
 
+
+        public async Task BroadcastScores(Dictionary<string, int> scores)
+        {
+            await Clients.All.SendAsync("ScoreUpdate", scores);
+        }
+
+        public async Task EndGame(List<PlayerScore> leaderboard)
+        {
+            try
+            {
+                _logger.LogInformation("Game Over. Sending leaderboard to clients.");
+                await Clients.All.SendAsync("GameOver", leaderboard);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending leaderboard.");
+                throw;
+            }
+        }
+
+        public async Task SaveScores(List<Score> scores)
+        {
+            await _context.Score.AddRangeAsync(scores);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }
-

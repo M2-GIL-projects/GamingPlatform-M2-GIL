@@ -187,6 +187,27 @@ namespace GamingPlatform.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> JoinPublicLobby(Guid id)
+        {
+            var lobby = _lobbyService.GetLobbyById(id);
+
+            if (lobby == null)
+            {
+                return NotFound();
+            }
+
+            // Logique pour ajouter un joueur au lobby
+            var player = await GetCurrentPlayer();
+            if (player != null)
+            {
+                // Ajouter le joueur au lobby
+                _lobbyService.AddPlayerToLobby(id, player.Id);
+            }
+
+            return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
+        }
+
+        [HttpGet]
         public async Task<IActionResult> JoinLobby(Guid id)
         {
             var lobby = _lobbyService.GetLobbyById(id);
