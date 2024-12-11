@@ -71,6 +71,7 @@
                                 <label for="registerEmail">Email (Optionnel)</label>
                                 <input type="email" class="form-control" id="registerEmail" name="email" />
                             </div>
+                            <input type="hidden" class="form-control" id="returnUrl" name="returnUrl" value="@ViewBag.returnUrl" />
                             <button type="submit" class="btn btn-primary">S'enregistrer</button>
                         </form>
                     </div>
@@ -82,6 +83,7 @@
                                 <label for="loginPseudo">Pseudo</label>
                                 <input type="text" class="form-control" id="loginPseudo" name="pseudo" required />
                             </div>
+                            <input type="hidden" class="form-control" id="returnUrl" name="returnUrl" value="@ViewBag.returnUrl" />
                             <button type="submit" class="btn btn-primary">Se connecter</button>
                         </form>
                     </div>

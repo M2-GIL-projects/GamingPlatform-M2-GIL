@@ -31,10 +31,24 @@ namespace GamingPlatform.Controllers
         {
             return View();
         }
+        public IActionResult Contact()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult SendContactForm(string name, string email, string subject, string message)
+        {
+            // Traitement du formulaire, par exemple envoi d'un email
+            // Si l'envoi est réussi, on redirige vers la même page avec un message de confirmation
+            ViewData["MessageSent"] = true;
+            return View();
+
+        }
 
         // Action pour l'enregistrement
         [HttpPost]
-        public async Task<IActionResult> RegisterPlayer(string pseudo, string name, string email)
+        public async Task<IActionResult> RegisterPlayer(string pseudo, string name, string email, string returnUrl = "/")
         {
             var player = await _playerService.AddPlayerAsync(pseudo, name, email);
             if (player == null)
@@ -48,12 +62,12 @@ namespace GamingPlatform.Controllers
             HttpContext.Session.SetInt32("PlayerId", player.Id);
             HttpContext.Session.SetString("PlayerPseudo", player.Pseudo);
 
-            return RedirectToAction("Index"); // Ou rediriger vers la page du joueur
+            return Redirect(returnUrl); // Redirection vers l'URL de retour ou la page d'accueil par défaut
         }
 
         // Action pour la connexion
         [HttpPost]
-        public async Task<IActionResult> LoginPlayer(string pseudo)
+        public async Task<IActionResult> LoginPlayer(string pseudo, string returnUrl = "/")
         {
             var player = await _playerService.GetPlayerByPseudoAsync(pseudo);
             if (player == null)
@@ -66,7 +80,7 @@ namespace GamingPlatform.Controllers
             HttpContext.Session.SetInt32("PlayerId", player.Id);
             HttpContext.Session.SetString("PlayerPseudo", player.Pseudo);
 
-            return RedirectToAction("Index"); // Ou rediriger vers la page du joueur
+            return Redirect(returnUrl); // Redirection vers l'URL de retour ou la page d'accueil par défaut
         }
 
         public async Task<Player> GetCurrentPlayer()
@@ -93,7 +107,7 @@ namespace GamingPlatform.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        public async Task<IActionResult> Player()
+        public async Task<IActionResult> Player(string returnUrl = "/")
         {
             var player = await GetCurrentPlayer(); // Récupérer le joueur actuel si connecté
             if (player != null)
@@ -104,8 +118,13 @@ namespace GamingPlatform.Controllers
             else
             {
                 // Si aucun joueur n'est connecté, on passe null ou un message approprié
+                ViewBag.returnUrl = returnUrl;
                 return View();
             }
+        }
+        public IActionResult Error()
+        {
+            return View(); // Redirige vers une vue d'erreur générique
         }
 
     }
