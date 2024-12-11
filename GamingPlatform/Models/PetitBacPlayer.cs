@@ -9,6 +9,7 @@ namespace GamingPlatform.Models
     {
         public int Id { get; set; } // Identifiant unique du joueur
         public string Pseudo { get; set; } // Pseudo du joueur
+        public string Status { get; set; } = "Inactive"; 
          // Jeton unique pour sécuriser l'accès à la session du joueur
         public string SessionToken { get; set; } = Guid.NewGuid().ToString();
 

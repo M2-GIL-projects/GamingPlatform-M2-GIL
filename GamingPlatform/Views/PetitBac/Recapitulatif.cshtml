@@ -3,7 +3,6 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <!-- Carte de récapitulatif -->
             <div class="card shadow-lg">
                 <div class="card-header bg-primary text-white text-center">
                     <h3>Récapitulatif de la Partie : Petit Bac</h3>
@@ -61,7 +60,7 @@
                                     </ul>
                                 </td>
                             </tr>
-                            <tr>
+                                 <tr>
                                 <th scope="row">Lien pour Inviter les Joueurs</th>
                                 <td>
                                     <!-- Alerte de copie personnalisée -->
@@ -79,7 +78,22 @@
                             </tr>
                         </tbody>
                     </table>
+                    <h4>Liste des Joueurs :</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Pseudo</th>
+            <th>Statut</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="player-list">
+        <!-- Les lignes des joueurs seront insérées dynamiquement ici -->
+    </tbody>
+</table>
+
                 </div>
+
                 <div class="card-footer text-center">
                     <a href="/PetitBac/Lobby?lobbyId=@Model.LobbyId" class="btn btn-success btn-lg px-4">Suivre l'évolution</a>
                 </div>
@@ -87,4 +101,31 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalCorrection" tabindex="-1" aria-labelledby="modalCorrectionLabel" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCorrectionLabel">Corriger les réponses de <span id="playerName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="correctionForm">
+                    <div id="answers-container">
+                        <!-- Les réponses des joueurs seront chargées dynamiquement ici -->
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" id="submitCorrection">Soumettre</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="game-info" data-game-id="@Model.Id" data-session-token="@ViewBag.SessionToken"></div>
+
+<!-- Ajouter ici le script SignalR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
 <script src="~/js/PetitBac/Rejoindre.js"></script>

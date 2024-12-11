@@ -73,6 +73,25 @@
                                 </div>
                             </form>
                         </tbody>
+                          
+                    </table>
+                     <h4>Liste des Joueurs :</h4>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Pseudo</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="player-list">
+                            @foreach (var player in ViewBag.Players)
+                            {
+                                <tr>
+                                    <td>@player.Pseudo</td>
+                                    <td>@player.Status</td>
+                                </tr>
+                            }
+                        </tbody>
                     </table>
                 </div>
                 <div class="card-footer text-center">
@@ -83,4 +102,7 @@
     </div>
 </div>
 
+<div id="game-info" data-game-id="@Model.Id" data-session-token="@ViewBag.SessionToken"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>
 <script src="~/js/PetitBac/RejoindreJoueur.js"></script>
