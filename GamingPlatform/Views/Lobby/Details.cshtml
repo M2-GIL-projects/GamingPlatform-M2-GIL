@@ -59,7 +59,10 @@
                     <div class="mt-4">
                         <h4>Inviter un joueur :</h4>
                         <p>Copiez et envoyez ce lien à vos amis pour les inviter dans ce lobby :</p>
-                        <input type="text" class="form-control" value=" @Url.Action("JoinPrivateLobby", "Lobby", new { id = Model.Id, password = Model.Password })" readonly />
+                    <input type="text"
+                           class="form-control"
+                           value="@Url.Action("JoinPrivateLobby", "Lobby", new { id = Model.Id, password = Model.Password }, "https")"
+                           readonly />
                     </div>
             }
 

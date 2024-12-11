@@ -8,11 +8,13 @@ public class GameController : Controller
 
         private readonly GameService _gameService;
         private readonly LobbyService _lobbyService;
+        private readonly PlayerService _playerService;
 
-        public GameController(GameService gameService, LobbyService lobbyService)
+        public GameController(GameService gameService, LobbyService lobbyService, PlayerService playerService)
         {
             _gameService = gameService;
             _lobbyService = lobbyService;
+            _playerService = playerService;
         }
 
         public IActionResult Index()
@@ -41,7 +43,13 @@ public class GameController : Controller
                 Game = game,
                 Lobbies = lobbies
             };
-
+            int? playerId = null;
+            var player = await GetCurrentPlayer();
+            if (player != null)
+            {
+                playerId = player.Id;
+            }
+            ViewBag.CurrentUserId = playerId;
             // Passer le modèle de vue à la vue
             return View(viewModel);
         }
@@ -67,7 +75,13 @@ public class GameController : Controller
                 Game = game,
                 Lobbies = lobbies
             };
-
+            int? playerId = null;
+            var player = await GetCurrentPlayer();
+            if (player != null)
+            {
+                playerId = player.Id;
+            }
+            ViewBag.CurrentUserId = playerId;
             // Passer le modèle de vue à la vue
             return View(viewModel);
         }
@@ -86,7 +100,20 @@ public class GameController : Controller
         //    //return View("GameBoard", new GameViewModel { Game = game, Lobby = lobby });
         //}
 
+        public async Task<Player> GetCurrentPlayer()
+        {
+            // Récupérer l'ID du joueur depuis la session
+            var playerId = HttpContext.Session.GetInt32("PlayerId");
+
+            if (playerId.HasValue)
+            {
+                return await _playerService.GetPlayerByIdAsync(playerId.Value);
+            }
+
+            return null;
+        }
     }
+
 }
 
 public class GameDetailsViewModel

@@ -41,7 +41,14 @@ namespace GamingPlatform.Controllers
 
             // Charger les jeux pour les filtres
             ViewBag.Games = _gameService.GetAvailableGames();
-
+ 
+            int ? playerId = null;
+            var player = await GetCurrentPlayer();
+            if (player != null)
+            {
+                playerId = player.Id;
+            }
+            ViewBag.CurrentUserId = playerId;
             return View(lobbies);
         }
 
@@ -195,6 +202,29 @@ namespace GamingPlatform.Controllers
             {
                 // Ajouter le joueur au lobby
                 _lobbyService.AddPlayerToLobby(id, player.Id);
+            }else
+            {
+                return RedirectToAction("Player", "Home");
+            }
+
+            return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ResumeLobby(Guid id)
+        {
+            var lobby = _lobbyService.GetLobbyById(id);
+
+            if (lobby == null)
+            {
+                return NotFound();
+            }
+
+            // Logique pour ajouter un joueur au lobby
+            var player = await GetCurrentPlayer();
+            if (player == null)
+            {
+                return RedirectToAction("Player", "Home");
             }
 
             return RedirectToAction("Details", "Lobby", new { id = lobby.Id });
