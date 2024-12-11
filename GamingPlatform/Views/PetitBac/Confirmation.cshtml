@@ -1,0 +1,13 @@
+@model GamingPlatform.Models.ConfirmationViewModel
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h2>Merci, @Model.PlayerPseudo !</h2>
+            <p>Vos réponses ont été soumises avec succès.</p>
+            <p>En attente des autres joueurs...</p>
+
+            <a href="/PetitBac/Recapitulatif?gameId=@Model.GameId" class="btn btn-primary mt-3">Retour au Récapitulatif</a>
+        </div>
+    </div>
+</div>
