@@ -73,22 +73,6 @@
                 <small class="text-danger d-none" id="categoryError">Vous devez sélectionner au moins 3 catégories.</small>
         </div>
 
-        <!-- Condition d'Arrêt -->
-        <div class="mb-4">
-            <label for="EndCondition" class="form-label">Condition d'Arrêt</label>
-            <select class="form-select" id="EndCondition" name="EndCondition" required>
-                <option value="TimeLimit" selected="@(Model.EndCondition == "TimeLimit")">Limite de Temps</option>
-                <option value="AllPlayersDone" selected="@(Model.EndCondition == "AllPlayersDone")">Lorsque tous les joueurs ont terminé</option>
-
-            </select>
-        </div>
-
-        <!-- Temps Limite -->
-        <div class="mb-4" id="TimeLimitSection" style="display: @(Model.EndCondition == "TimeLimit" ? "block" : "none");">
-            <label for="TimeLimit" class="form-label">Temps Limite (en minutes)</label>
-            <input type="number" class="form-control" id="TimeLimit" name="TimeLimit" value="@Model.TimeLimit" min="1" />
-            <small class="text-danger d-none" id="timeLimitError">Vous devez renseigner un temps limite valide.</small>
-        </div>
 
         <!-- Bouton de soumission -->
         <div class="d-flex justify-content-center mb-5">

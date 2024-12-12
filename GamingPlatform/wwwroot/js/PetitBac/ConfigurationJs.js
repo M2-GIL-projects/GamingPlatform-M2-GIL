@@ -2,27 +2,10 @@
 document.addEventListener("DOMContentLoaded", function () {
 const form = document.getElementById("configureGameForm");
 const pseudoInput = document.getElementById("CreatorPseudo");
-const timeLimitInput = document.getElementById("TimeLimit");
-const endConditionDropdown = document.getElementById("EndCondition");
 const categoriesContainer = document.getElementById("categoriesContainer");
 const categoryCheckboxes = document.querySelectorAll(".category-checkbox");
-
 const pseudoError = document.getElementById("pseudoError");
-const timeLimitError = document.getElementById("timeLimitError");
 const categoryError = document.getElementById("categoryError");
-
-// Fonction pour afficher/masquer le champ Temps Limite
-const toggleTimeLimitSection = () => {
-const timeLimitSection = document.getElementById("TimeLimitSection");
-if (endConditionDropdown.value === "TimeLimit") {
-    timeLimitSection.style.display = "block";
-} else {
-    timeLimitSection.style.display = "none";
-}
-};
-
-endConditionDropdown.addEventListener("change", toggleTimeLimitSection);
-toggleTimeLimitSection();
 
 form.addEventListener("submit", function (e) {
 let isValid = true;
@@ -46,17 +29,7 @@ if (pseudoValue === "") {
     pseudoError.classList.add("d-none");
 }
 
-// Validation du temps limite
-if (endConditionDropdown.value === "TimeLimit") {
-    const timeLimitValue = parseInt(timeLimitInput.value);
-    if (isNaN(timeLimitValue) || timeLimitValue < 1 || timeLimitValue > 30) {
-        timeLimitError.classList.remove("d-none");
-        timeLimitError.textContent = "Le temps limite doit être entre 1 et 30 minutes.";
-        isValid = false;
-    } else {
-        timeLimitError.classList.add("d-none");
-    }
-}
+
 
 //Validation des lettres 
 document.getElementById("configureGameForm").addEventListener("submit", function (event) {

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GamingPlatform.Migrations
 {
     [DbContext(typeof(GamingPlatformContext))]
-    [Migration("20241209093230_AddStatusColumn")]
-    partial class AddStatusColumn
+    [Migration("20241212025656_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -149,10 +149,6 @@ namespace GamingPlatform.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("EndCondition")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsGameStarted")
                         .HasColumnType("bit");
 
@@ -164,9 +160,6 @@ namespace GamingPlatform.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PlayerCount")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TimeLimit")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -209,7 +202,7 @@ namespace GamingPlatform.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("etat")
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

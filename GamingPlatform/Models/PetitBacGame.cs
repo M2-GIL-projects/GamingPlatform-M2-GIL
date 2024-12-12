@@ -11,8 +11,6 @@ namespace GamingPlatform.Models
     {
         public int Id { get; set; } // Identifiant unique de la partie
         public List<char> Letters { get; set; } = new List<char>();
-        public string EndCondition { get; set; } // Condition d'arrêt
-        public int? TimeLimit { get; set; } // Temps limite (optionnel)
         public bool IsGameStarted { get; set; } = false; // Indique si la partie a commencé
         public DateTime CreatedAt { get; set; } = DateTime.Now; // Date de création
         

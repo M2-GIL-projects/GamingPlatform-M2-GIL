@@ -33,23 +33,7 @@
                                     }
                                 </td>
                             </tr>
-                            <tr>
-                                <th scope="row">Condition d'Arrêt</th>
-                                <td>
-                                    @if (Model.EndCondition == "TimeLimit")
-                                    {
-                                        <span>Limite de Temps</span>
-                                        @if (Model.TimeLimit.HasValue)
-                                        {
-                                            <span> - @Model.TimeLimit minutes</span>
-                                        }
-                                    }
-                                    else if (Model.EndCondition == "AllPlayersDone")
-                                    {
-                                        <span>Lorsque tous les joueurs ont terminé</span>
-                                    }
-                                </td>
-                            </tr>
+                    
                             <tr>
                                 <th scope="row">Catégories Sélectionnées</th>
                                 <td>

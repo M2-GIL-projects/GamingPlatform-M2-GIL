@@ -146,10 +146,6 @@ namespace GamingPlatform.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("EndCondition")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsGameStarted")
                         .HasColumnType("bit");
 
@@ -161,9 +157,6 @@ namespace GamingPlatform.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PlayerCount")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("TimeLimit")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -206,7 +199,7 @@ namespace GamingPlatform.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("etat")
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
