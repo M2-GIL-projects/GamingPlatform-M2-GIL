@@ -4,6 +4,7 @@ using GamingPlatform.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GamingPlatform.Migrations
 {
     [DbContext(typeof(GamingPlatformContext))]
-    partial class GamingPlatformContextModelSnapshot : ModelSnapshot
+    [Migration("20241209092226_addtabletest")]
+    partial class addtabletest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -146,6 +149,10 @@ namespace GamingPlatform.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("EndCondition")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsGameStarted")
                         .HasColumnType("bit");
 
@@ -157,6 +164,9 @@ namespace GamingPlatform.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("PlayerCount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TimeLimit")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -199,11 +209,7 @@ namespace GamingPlatform.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-<<<<<<< HEAD
                     b.Property<string>("Status")
-=======
-                    b.Property<string>("etat")
->>>>>>> ef10efea93bd8b2d54fd401fb0787af9e809c423
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
