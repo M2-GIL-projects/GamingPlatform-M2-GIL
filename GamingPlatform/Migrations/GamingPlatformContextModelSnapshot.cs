@@ -199,11 +199,7 @@ namespace GamingPlatform.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-<<<<<<< HEAD
                     b.Property<string>("Status")
-=======
-                    b.Property<string>("etat")
->>>>>>> ef10efea93bd8b2d54fd401fb0787af9e809c423
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
