@@ -194,6 +194,15 @@ namespace GamingPlatform.Services
                             });
                         }
 
+                    case "PTB":
+                        {
+                            return new OkObjectResult(new
+                            {
+                                Message = "Partie de Petit Bac démarrée",
+                                RedirectUrl = $"/PetitBac/Configure?lobbyId={lobbyId}" // Remplacez ceci par la logique appropriée si nécessaire.
+                            });
+                        }
+
                     default:
                         return new BadRequestObjectResult(new { Message = $"Le type de jeu avec le code {lobby.Code} n'est pas pris en charge." });
                 }

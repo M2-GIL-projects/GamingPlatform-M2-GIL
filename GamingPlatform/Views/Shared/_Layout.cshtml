@@ -12,6 +12,9 @@
 </head>
 
 <body>
+       
+    @if (ViewBag.HideHeader != true)
+    {
     <!-- En-tête (sticky) -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
@@ -43,11 +46,13 @@
             </div>
         </div>
     </nav>
+    }
 
     <main role="main" class="pb-3">
         @RenderBody()
     </main>
-
+  @if (ViewBag.HideFooter != true)
+    {
     <!-- Pied de page -->
     <footer class="text-center py-4">
         <div class="container">
@@ -75,6 +80,7 @@
             <p>&copy; @DateTime.Now.Year JeuxHub. Tous droits réservés.</p>
         </div>
     </footer>
+    }
 
     <!-- jQuery - ne gardez qu'une seule version -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

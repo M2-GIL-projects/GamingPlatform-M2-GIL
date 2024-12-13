@@ -18,6 +18,9 @@ public class Lobby
         // Relation : Un lobby contient plusieurs joueurs
     public ICollection<LobbyPlayer> LobbyPlayers { get; set; } = new List<LobbyPlayer>();
 
+    // Relation avec PetitBacGame
+        public PetitBacGame? PetitBacGame { get; set; } // Une partie de Petit Bac dans ce lobby
+
     }
 
 
