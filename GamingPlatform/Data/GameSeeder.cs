@@ -18,10 +18,15 @@ namespace GamingPlatform.Data
 			// Liste des jeux à insérer ou mettre à jour
 			var games = new List<Game>
 	{
-		new Game { Code = "SPT", Name = "SpeedTyping", Description = "Un jeu de dactylographie rapide.", ImageUrl = "/images/speedtyping.png" },
-		new Game { Code = "MOR", Name = "Morpion", Description = "Le classique jeu du morpion.", ImageUrl = "/images/morpion.png" },
-		new Game { Code = "BTN", Name = "BatailleNavale", Description = "Un jeu de stratégie navale.", ImageUrl = "/images/bataillenavale.png" },
-		new Game { Code = "PTB", Name = "PetitBac", Description = "Un jeu d'association de mots par catégories.", ImageUrl = "/images/petitbac.png" },
+		new Game { 
+			Code = "SPT", Name = "SpeedTyping", 
+			Description = 
+			"Le jeu Speed Typing est un jeu de dactylographie. C’est une activité interactive qui consiste à taper les mots qui apparaissent à l’écran, le plus correctement et le plus rapidement possible", ImageUrl = "/images/speedtyping.png" },
+		new Game { Code = "MOR", Name = "Morpion", 
+		Description = "Le morpion est un jeu de réflexion se pratiquant à deux joueurs au tour par tour et dont le but est de créer le premier un alignement sur une grille. Le jeu se joue généralement avec papier et crayon.", ImageUrl = "/images/morpion.png" },
+		//new Game { Code = "BTN", Name = "BatailleNavale", Description = "Un jeu de stratégie navale.", ImageUrl = "/images/bataillenavale.png" },
+		new Game { Code = "PTB", Name = "PetitBac", 
+		Description = "Le Petit Bac repose sur la rapidité et la connaissance générale des joueurs. L’objectif est de remplir des catégories prédéterminées avec des mots commençant par une lettre choisie. Les joueurs doivent trouver le maximum de réponses correctes.", ImageUrl = "/images/petitbac.png" },
 		new Game
 		{
 			Code = "LAB",

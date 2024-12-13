@@ -54,24 +54,23 @@
 </div>
 
 
-<section id="games" class="container my-5">
+<section id="games" class="container my-2">
     <h2 class="text-center mb-4">Nos Jeux</h2>
     <div class="row">
         @if (Model != null && Model.Any())
         {
             @foreach (var game in Model)
             {
-                <div class="col-md-4 mb-4">
-                    <div class="card game-card">
-                        <img src="@game.ImageUrl" class="card-img-top img-fluid" style="max-height: 200px; object-fit: cover;" alt="@game.Name">
-                        <div class="card-body text-center">
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="card game-card h-100">
+                        <img src="@game.ImageUrl" class="card-img-top img-fluid" style="height: 150px; object-fit: cover;"
+                            alt="@game.Name">
+                        <div class="card-body d-flex flex-column">
                             <h5 class="card-title">@game.Name</h5>
-                            <p class="card-text">
-                                @(game.Description.Length > 100
-                                    ? game.Description.Substring(0, 100) + "..."
-                                    : game.Description)
+                            <p class="card-text flex-grow-1">
+                                @(game.Description.Length > 80 ? game.Description.Substring(0, 80) + "..." : game.Description)
                             </p>
-                            <a href="/game/details/@game.Id" class="btn btn-primary">Jouer</a>
+                            <a href="/game/details/@game.Id" class="btn btn-primary mt-auto">Jouer</a>
                         </div>
                     </div>
                 </div>
@@ -83,6 +82,7 @@
         }
     </div>
 </section>
+
 
 
 <section class="container my-5">
@@ -130,7 +130,8 @@
                 <form id="createLobbyForm" asp-controller="Lobby" asp-action="CreateWithSelect" method="post">
                     <div class="form-group">
                         <label for="lobbyName">Nom du lobby</label>
-                        <input type="text" class="form-control" id="lobbyName" name="Name" placeholder="Nom du lobby" required>
+                        <input type="text" class="form-control" id="lobbyName" name="Name" placeholder="Nom du lobby"
+                            required>
                     </div>
 
                     <div class="form-group">
@@ -151,7 +152,8 @@
 
                     <div id="passwordField" class="form-group d-none mt-3">
                         <label for="lobbyPassword">Mot de passe</label>
-                        <input type="password" class="form-control" id="lobbyPassword" name="Password" placeholder="Mot de passe">
+                        <input type="password" class="form-control" id="lobbyPassword" name="Password"
+                            placeholder="Mot de passe">
                     </div>
 
                     <button type="submit" class="btn btn-primary mt-3">Créer</button>
@@ -165,7 +167,8 @@
 </div>
 
 <!-- Modal d'enregistrement ou de connexion -->
-<div class="modal fade" id="registerOrLoginModal" tabindex="-1" role="dialog" aria-labelledby="registerOrLoginModalLabel" aria-hidden="true">
+<div class="modal fade" id="registerOrLoginModal" tabindex="-1" role="dialog"
+    aria-labelledby="registerOrLoginModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -178,10 +181,12 @@
                 <!-- Formulaire de connexion ou d'enregistrement -->
                 <ul class="nav nav-tabs" id="registerLoginTab" role="tablist">
                     <li class="nav-item">
-                        <a class="nav-link active" id="register-tab" data-toggle="tab" href="#register" role="tab" aria-controls="register" aria-selected="true">S'enregistrer</a>
+                        <a class="nav-link active" id="register-tab" data-toggle="tab" href="#register" role="tab"
+                            aria-controls="register" aria-selected="true">S'enregistrer</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" id="login-tab" data-toggle="tab" href="#login" role="tab" aria-controls="login" aria-selected="false">Se connecter</a>
+                        <a class="nav-link" id="login-tab" data-toggle="tab" href="#login" role="tab"
+                            aria-controls="login" aria-selected="false">Se connecter</a>
                     </li>
                 </ul>
 

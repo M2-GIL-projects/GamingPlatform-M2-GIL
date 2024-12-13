@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GamingPlatform.Migrations
 {
     [DbContext(typeof(GamingPlatformContext))]
-    [Migration("20241213110255_MergeMorpionDev")]
-    partial class MergeMorpionDev
+    [Migration("20241213115938_InitialM")]
+    partial class InitialM
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

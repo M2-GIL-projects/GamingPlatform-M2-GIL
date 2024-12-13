@@ -78,12 +78,13 @@
                 }
                 else if (Model.Status == GamingPlatform.Models.LobbyStatus.InProgress)
                 {
-                    if (@Model.Game.Name == "SpeedTyping")
+                    if (@Model.Game.Name == "SpeedTyping" || @Model.Game.Name == "Morpion")
                     {
                         <a href="/Game/@Model.Game.Name/Play/@Model.Id" class="btn btn-success">
                             Rejoindre le plateau de jeu
                         </a>
                     }
+                    
                     else
                     {
                         <a href="/Game/Play/@Model.Game.Code?lobbyId=@Model.Id" class="btn btn-success">

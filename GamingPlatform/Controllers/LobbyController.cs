@@ -6,7 +6,6 @@ using Microsoft.Data.SqlClient;
 
 namespace GamingPlatform.Controllers
 {
-    [Route("/Lobby")]
     public class LobbyController : Controller
     {
         private readonly LobbyService _lobbyService;
@@ -162,7 +161,7 @@ namespace GamingPlatform.Controllers
             }
         }
 
-         [HttpPost("Start/{id}")]
+         [HttpPost("Lobby/Start/{id}")]
         public IActionResult Start(Guid id)
         {
             var result = _lobbyService.StartGame(id);
