@@ -152,7 +152,7 @@ namespace GamingPlatform.Services
 
                 if (lobby.Status != LobbyStatus.Waiting)
                 {
-            
+
                     return new BadRequestObjectResult(new { Message = "Le lobby n'est pas en attente. il est en: {lobby.Status}" });
                 }
 
@@ -176,6 +176,21 @@ namespace GamingPlatform.Services
                             {
                                 Message = "Partie de Speed Typing démarrée",
                                 RedirectUrl = $"/Game/SpeedTyping/Play/{lobbyId}"
+                            });
+                        }
+
+                    case "MOR":
+                        {
+                            var hubContext = _serviceProvider.GetRequiredService<IHubContext<MorpionHub>>();
+                            var morpion = new Morpion();
+                            morpion.InitializeBoard();
+
+                            // Notifie les joueurs via SignalR
+                            hubContext.Clients.Group(lobbyId.ToString()).SendAsync("GameStarted", morpion.RenderBoard());
+                            return new OkObjectResult(new
+                            {
+                                Message = "Partie de Morpion démarrée",
+                                RedirectUrl = $"/Game/Morpion/Play/{lobbyId}"
                             });
                         }
 

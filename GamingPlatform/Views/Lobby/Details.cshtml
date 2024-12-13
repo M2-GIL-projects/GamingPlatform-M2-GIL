@@ -35,7 +35,10 @@
 
             <!-- Liste des joueurs -->
             <h3 class="mt-4">Joueurs</h3>
+
+
             <ul class="list-group">
+
                 @if (Model.LobbyPlayers != null && Model.LobbyPlayers.Any())
                 {
                     @foreach (var lobbyPlayer in Model.LobbyPlayers)
@@ -54,6 +57,7 @@
                 }
             </ul>
             <!-- Si le lobby est privé, afficher le lien d'invitation -->
+
             <div class="mt-4">
                 <h4>Inviter un joueur :</h4>
                 <p>Copiez et envoyez ce lien à vos amis pour les inviter dans ce lobby :</p>
@@ -64,6 +68,7 @@
                     <button class="btn btn-outline-secondary" type="button" onclick="copyInviteLink()">Copier</button>
                 </div>
             </div>
+
 
             <!-- Actions basées sur le status -->
             <div class="mt-4 text-center">
@@ -85,6 +90,7 @@
                             Rejoindre le plateau de jeu
                         </a>
                     }
+
                 }
                 else if (Model.Status == GamingPlatform.Models.LobbyStatus.Finished)
                 {
@@ -113,9 +119,6 @@
                     alert("Une erreur est survenue. Veuillez réessayer.");
                 });
         }
-
-
-
         function copyInviteLink() {
             var copyText = document.getElementById("inviteLink");
             copyText.select();

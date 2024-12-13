@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿﻿using Microsoft.AspNetCore.Mvc;
 using GamingPlatform.Services;
 using Microsoft.EntityFrameworkCore;
 using GamingPlatform.Models;
@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 
 namespace GamingPlatform.Controllers
 {
+    [Route("/Lobby")]
     public class LobbyController : Controller
     {
         private readonly LobbyService _lobbyService;
@@ -161,7 +162,7 @@ namespace GamingPlatform.Controllers
             }
         }
 
-        [HttpPost]
+         [HttpPost("Start/{id}")]
         public IActionResult Start(Guid id)
         {
             var result = _lobbyService.StartGame(id);

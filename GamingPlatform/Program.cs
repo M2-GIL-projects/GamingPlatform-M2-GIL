@@ -88,6 +88,7 @@ app.MapControllerRoute(
 
 app.MapHub<ChatHub>("/chatHub");
 app.MapHub<LabyrinthHub>("/labyrinthHub");
+app.MapHub<MorpionHub>("/MorpionHub");
 
 // Redirection pour le speed Typing game
 app.MapHub<SpeedTypingHub>("/SpeedTypingHub");
