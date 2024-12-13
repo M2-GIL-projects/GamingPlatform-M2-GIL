@@ -18,12 +18,14 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
+	options.MaximumReceiveMessageSize = 10 * 1024 * 1024; // 10 Mo
 });
 
 builder.Services.AddScoped<GameService>();
 builder.Services.AddScoped<LobbyService>();
 builder.Services.AddScoped<PlayerService>();
 builder.Services.AddScoped<GameSeeder>();
+builder.Services.AddScoped<LabyrinthService>();
 builder.Services.AddSingleton<SpeedTyping>();
 builder.Services.AddSingleton(new ConcurrentDictionary<string, string>());
 

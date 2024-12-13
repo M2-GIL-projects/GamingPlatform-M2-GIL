@@ -31,19 +31,9 @@ namespace GamingPlatform.Data
 		{
 			Code = "LAB",
 			Name = "Course de Labyrinthe",
-			Description = "Principe du jeu\r\n" +
-						  "Dans ce jeu de course de labyrinthe, deux joueurs s'affrontent pour être le premier à atteindre le point de sortie. Le labyrinthe est en constante évolution, ce qui ajoute un élément stratégique et imprévisible à la course. \r\n" +
-						  "Matériel\r\n•\tUn plateau de jeu représentant un labyrinthe modifiable\r\n•\t" +
-						  "Des tuiles de labyrinthe mobiles\r\n•\tDeux pions (un pour chaque joueur)\r\n•\t" +
-						  "Un marqueur pour indiquer le point de sortie\r\nMise en place\r\n1.\t" +
-						  "Disposez les tuiles du labyrinthe de manière aléatoire sur le plateau.\r\n2.\t" +
-						  "Placez le marqueur de sortie à l'opposé des positions de départ des joueurs.\r\n3.\t" +
-						  "Chaque joueur place son pion sur sa case de départ.\r\nDéroulement d'un tour\r\n1.\t" +
-						  "Modification du labyrinthe : \r\no\tLe joueur actif insère une tuile de labyrinthe dans une rangée ou colonne du plateau.\r\no\t" +
-						  "Cette action modifie les chemins disponibles dans le labyrinthe.\r\n2.\t" +
-						  "Déplacement du pion : \r\no\tAprès avoir modifié le labyrinthe, le joueur peut déplacer son pion.\r\no\t" +
-						  "Le déplacement se fait en suivant les couloirs ouverts du labyrinthe.\r\no\t" +
-						  "Le joueur peut se déplacer aussi loin qu'il le souhaite tant qu'il suit un chemin ininterrompu.\r\n",
+			Description = "Dans Labyrinthe Course, deux joueurs s'affrontent dans une course à travers un labyrinthe fixe. L’objectif est simple : être le premier à atteindre le point " +
+			"de sortie en naviguant à travers les couloirs sinueux du labyrinthe. Les joueurs doivent non seulement avancer rapidement, mais aussi anticiper les mouvements de leur adversaire et " +
+			"choisir les meilleures trajectoires. La partie met en avant à la fois la stratégie de déplacement et la prise de décision rapide.",
 			ImageUrl = "/images/labyrinthe.png"
 		}
 	};

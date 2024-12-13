@@ -1,8 +1,6 @@
 ﻿﻿using Microsoft.AspNetCore.Mvc;
 using GamingPlatform.Services;
-using Microsoft.EntityFrameworkCore;
 using GamingPlatform.Models;
-using Microsoft.Data.SqlClient;
 
 using GamingPlatform.Data;
 

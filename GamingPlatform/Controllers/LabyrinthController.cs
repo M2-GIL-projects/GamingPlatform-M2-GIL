@@ -1,44 +1,123 @@
 ﻿using GamingPlatform.Hubs;
 using GamingPlatform.Models;
+using GamingPlatform.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.JSInterop;
 using Newtonsoft.Json;
 
 namespace GamingPlatform.Controllers
 {
-    
+    [Route("Game/Labyrinth")]
     public class LabyrinthController : Controller
     {
         private readonly LabyrinthGenerator _labyrinthGenerator;
 
-        public LabyrinthController(IHubContext<LabyrinthHub> hubContext)
-        {
-            _labyrinthGenerator = new LabyrinthGenerator(hubContext);
+		private readonly LabyrinthService _labyrinthService;
+        private readonly LobbyService _lobbyService;
+        private readonly PlayerService _playerService;
+
+        public LabyrinthController(IHubContext<LabyrinthHub> hubContext, LabyrinthService labyrinthService, LobbyService lobbyService, PlayerService playerService) { 
+			_labyrinthService = labyrinthService;
+            _lobbyService = lobbyService;
+            _playerService = playerService;
         }
-        public IActionResult Index()
+       
+        [HttpGet("Maze/{lobbyId}")]
+        public async Task<IActionResult> Maze(Guid lobbyId)
         {
+
+            var isGenerated = await _labyrinthService.IsLabyrinthGeneratedForLobbyAsync(lobbyId);
+            if (!isGenerated)
+            {
+                return NotFound("Aucun labyrinthe n'a été généré pour ce lobby.");
+            }
+            ViewBag.lobbyId = lobbyId;
             return View();
         }
-        public async Task<IActionResult> Maze(int rows = 10, int cols = 10)
+
+        public async Task<Player> GetCurrentPlayer()
         {
-            // Génération du labyrinthe
-            bool[,] adjacencyMatrix = await _labyrinthGenerator.GenerateLabyrinth(rows, cols);
+            // Récupérer l'ID du joueur depuis la session
+            var playerId = HttpContext.Session.GetInt32("PlayerId");
 
-            // Sérialisation de la matrice d'adjacence en JSON pour l'utiliser dans la vue
-            var adjacencyJson = JsonConvert.SerializeObject(adjacencyMatrix);
+            if (playerId.HasValue)
+            {
+                return await _playerService.GetPlayerByIdAsync(playerId.Value);
+            }
 
-            // Transmettre le JSON à la vue
-            ViewBag.AdjacencyMatrix = adjacencyJson;
+            return null;
+        }
 
+        [HttpGet("Play/{lobbyId}")]
+        public async Task<IActionResult> Play(Guid lobbyId)
+        {
+            var lobby = _lobbyService.GetLobbyWithGameAndPlayers(lobbyId);
+            if (lobby == null)
+            {
+                return NotFound("Lobby non trouvé.");
+            }
+
+            var currentPlayer = await GetCurrentPlayer();
+            if (currentPlayer == null)
+            {
+                return RedirectToAction("Player", "Home");
+            }
+
+            var players = lobby.LobbyPlayers.ToList();
+            if (players.Count < 2)
+            {
+                return NotFound("Une erreur est survenue: on a pas deux joueurs dans le jeu");
+            }
+
+            var isGenerated = await _labyrinthService.IsLabyrinthGeneratedForLobbyAsync(lobbyId);
+
+            if (isGenerated)
+            {
+                return RedirectToAction("Maze", "Labyrinth", new {lobbyId});
+            }
+            // Extraire les pseudos des joueurs
+            var player1 = players[0].Player.Pseudo;
+            var player2 = players[1].Player.Pseudo;
+
+            ViewBag.lobbyId = lobbyId;
+            ViewBag.player1 = player1;
+            ViewBag.player2 = player2;
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> GenerateMaze(int rows = 10, int cols = 10)
+        [HttpGet("getlabyrinth/{id}")]
+        public async Task<IActionResult> GetLabyrinth(int id)
+		{
+			var labyrinth = await _labyrinthService.GetLabyrinthByIdAsync(id);
+			if (labyrinth == null)
+			{
+				return NotFound(new { message = "Labyrinthe non trouvé." });
+			}
+
+			return Ok(new
+			{
+				id = labyrinth.Id,
+				data = labyrinth.Data // Assurez-vous que Data contient une chaîne JSON valide
+			});
+		}
+
+        [HttpGet("getlabyrinthlobby/{lobbyId}")]
+        public async Task<IActionResult> GetLabyrinthLobby(Guid lobbyId)
         {
-            await _labyrinthGenerator.GenerateLabyrinth(rows, cols);
-            return Ok(); // Retourne une réponse OK après avoir généré et envoyé le labyrinthe via SignalR
+            var labyrinth = await _labyrinthService.GetLabyrinthByLobbyIdAsync(lobbyId);
+            if (labyrinth == null)
+            {
+                return NotFound(new { message = "Labyrinthe non trouvé." });
+            }
+
+            return Ok(new
+            {
+                id = labyrinth.Id,
+                data = labyrinth.Data 
+            });
         }
+
 
     }
 

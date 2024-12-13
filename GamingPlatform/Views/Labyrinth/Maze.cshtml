@@ -1,25 +1,61 @@
 ﻿@{
-    Layout = null;  
-    var adjacencyMatrix = ViewBag.AdjacencyMatrix;
+	Layout = null;
 }
-<meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="~/css/labyrinth/labyrinth.css" asp-append-version="true" />
-    <title>Labyrinth</title>
-<body>
-    <div id="labyrinth">
+
+<meta charset="utf-8">
+<title>Course Labyrinthe</title>
+<link rel="stylesheet" href="~/css/labyrinth/style.css" asp-append-version="true" />
+
+<body class="d-flex flex-column vh-100 bg-light">
+    <!-- Bouton Quitter -->
+    <a href="/lobby" class="quit-button">Quitter le jeu</a>
+
+    <!-- Spinner de chargement -->
+    <!-- Spinner de chargement -->
+    <div id="loadingSpinner">
+        <div class="spinner"></div>
+        <p>Chargement du labyrinthe ...</p>
     </div>
+
+    <!-- Canvas masqué initialement -->
+    <div id="gameContainer" style="display: none;">
+        <canvas width="700" height="500" style="border: 2px solid black" oncontextmenu="return false;"></canvas>
+        <p id="gameMessages">Une seconde, les sbires travaillent dur pour construire ta perte.</p>
+    </div>
+
     <script src="~/js/signalr/dist/browser/signalr.js"></script>
-    <script src="~/js/labyrinth/labyrinth.js"></script>
     <script>
-    // Récupérer la matrice d'adjacence sérialisée depuis la vue Razor
-    const adjacency = JSON.parse('@Html.Raw(adjacencyMatrix)');
+        var labyrinth;
+        var gameReady = false;
+        const lobbyId = '@ViewBag.lobbyId';
+        // Appel pour récupérer le labyrinthe
+        fetch(`/game/labyrinth/getlabyrinthlobby/${lobbyId}`) // Vérifiez le bon chemin de l'endpoint
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json(); // Convertir la réponse en JSON
+            })
+            .then(data => {
+                try {
+                    // Convertir le champ `data` en un objet JSON
+                    labyrinth = JSON.parse(data.data);
+                    gameReady = true;
 
-    // Définir les dimensions du labyrinthe
-    const rows = 15;  // Vous pouvez ajuster ces valeurs
-    const cols = 15;  // Vous pouvez ajuster ces valeurs
+                    // Masquer le spinner et afficher le canvas
+                    document.getElementById("loadingSpinner").style.display = "none";
+                    document.getElementById("gameContainer").style.display = "block";
 
-    // Appeler la fonction de génération du labyrinthe
-    generateLabyrinth(adjacency, rows, cols);
-</script>
+                    render(); // Démarrer l'affichage du jeu
+                } catch (parseError) {
+                    console.error("Error parsing labyrinth data:", parseError);
+                }
+            })
+            .catch(err => {
+                console.error("Error fetching labyrinth:", err.toString());
+                // Optionnel : afficher un message d'erreur ou réessayer
+            });
+
+    </script>
+	<script src="~/js/labyrinth/actions.js"></script>
 </body>

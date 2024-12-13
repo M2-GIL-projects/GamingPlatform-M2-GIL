@@ -18,14 +18,17 @@ namespace GamingPlatform.Data
         public DbSet<Game> Game { get; set; }
         public DbSet<Lobby> Lobby { get; set; }
         public DbSet<LobbyPlayer> LobbyPlayer { get; set; }
+
         public DbSet<Score> Score { get; set; }
         public DbSet<Sentence> Sentences { get; set; }
         public DbSet<PetitBacGame> PetitBacGames { get; set; }
         public DbSet<PetitBacPlayer> PetitBacPlayer { get; set; }      
         public DbSet<PetitBacCategory> PetitBacCategories { get; set; }
       
+		public DbSet<Labyrinth> Labyrinth { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Contrainte d'unicité pour le champ Code dans Games
             modelBuilder.Entity<Game>()
@@ -59,7 +62,13 @@ namespace GamingPlatform.Data
                 .HasOne(pbg => pbg.Lobby)
                 .WithOne(l => l.PetitBacGame)
                 .HasForeignKey<PetitBacGame>(pbg => pbg.LobbyId);
-            
+            // relation entre Labyrinth et Lobby
+            modelBuilder.Entity<Labyrinth>()
+                .HasOne(l => l.Lobby)           // Un labyrinthe appartient à un lobby
+                .WithMany()                      // Aucun besoin de définir une collection inversée si non nécessaire
+                .HasForeignKey(l => l.LobbyId)  // La clé étrangère dans Labyrinth
+                .OnDelete(DeleteBehavior.Cascade); // Optionnel : définir la suppression en cascade
+
             modelBuilder.Entity<PetitBacPlayer>()
                 .HasOne(pbp => pbp.PetitBacGame)
                 .WithMany(pbg => pbg.Players)
@@ -70,5 +79,7 @@ namespace GamingPlatform.Data
 
 
         }
+
+
     }
 }
