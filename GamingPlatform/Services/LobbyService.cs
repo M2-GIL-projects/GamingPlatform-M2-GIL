@@ -17,7 +17,7 @@ namespace GamingPlatform.Services
         public LobbyService(GamingPlatformContext context, IServiceProvider serviceProvider)
         {
             _context = context;
-             _serviceProvider = serviceProvider;
+            _serviceProvider = serviceProvider;
         }
 
         // Crée un nouveau lobby.
@@ -170,7 +170,7 @@ namespace GamingPlatform.Services
                             UpdateLobby(lobby);
 
                             hubContext.Clients.Group(lobbyId.ToString()).SendAsync("GameStarted", speedTypingGame.TextToType, speedTypingGame.TimeLimit);
-                            
+
                             redirectUrl = $"/Game/SpeedTyping/Play/{lobbyId}";
                             return new OkObjectResult("Partie de Speed Typing démarrée");
                         }
@@ -184,6 +184,35 @@ namespace GamingPlatform.Services
                 return new ObjectResult($"Une erreur est survenue : {ex.Message}") { StatusCode = 500 };
             }
         }
+
+
+        public List<IGrouping<string?, Score>> GetTopScoresPerGame(int topCount = 5)
+        {
+            var scoresWithGameType = _context.Score
+                .Join(_context.Lobby,
+                    score => score.LobbyId,
+                    lobby => lobby.Id,
+                    (score, lobby) => new { Score = score, GameType = lobby.GameType })
+                .ToList();
+
+            return scoresWithGameType
+                .GroupBy(x => x.GameType)
+                .Select(group => new
+                {
+                    GameType = group.Key,
+                    TopScores = group
+                        .OrderByDescending(x => x.Score.WPM)
+                        .ThenByDescending(x => x.Score.Accuracy)
+                        .Take(topCount)
+                        .Select(x => x.Score)
+                })
+                .Where(x => x.TopScores.Any())
+                .Select(x => x.TopScores.GroupBy(s => x.GameType).First())
+                .ToList();
+        }
+
+
+
     }
 }
 public class PlayerAlreadyInLobbyException : Exception

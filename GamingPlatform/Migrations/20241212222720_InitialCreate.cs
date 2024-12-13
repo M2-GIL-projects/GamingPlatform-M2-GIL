@@ -48,13 +48,12 @@ namespace GamingPlatform.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LobbyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PlayerPseudo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PlayerId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Pseudo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     WPM = table.Column<int>(type: "int", nullable: false),
-                    Accuracy = table.Column<double>(type: "float", nullable: false),
-                    RawScore = table.Column<int>(type: "int", nullable: false),
-                    AdjustedScore = table.Column<int>(type: "int", nullable: false),
-                    Difficulty = table.Column<int>(type: "int", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Accuracy = table.Column<float>(type: "real", nullable: false),
+                    Difficulty = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DatePlayed = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {

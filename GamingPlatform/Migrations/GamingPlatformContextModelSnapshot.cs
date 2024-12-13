@@ -138,27 +138,26 @@ namespace GamingPlatform.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("Accuracy")
-                        .HasColumnType("float");
+                    b.Property<float>("Accuracy")
+                        .HasColumnType("real");
 
-                    b.Property<int>("AdjustedScore")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("DatePlayed")
+                        .HasColumnType("datetime2");
 
-                    b.Property<int>("Difficulty")
-                        .HasColumnType("int");
+                    b.Property<string>("Difficulty")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("LobbyId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("PlayerPseudo")
+                    b.Property<string>("PlayerId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RawScore")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Pseudo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("WPM")
                         .HasColumnType("int");

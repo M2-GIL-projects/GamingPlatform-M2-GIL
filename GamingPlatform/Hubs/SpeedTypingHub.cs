@@ -4,6 +4,7 @@ using GamingPlatform.Services;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
 
+
 namespace GamingPlatform.Hubs
 {
     public class SpeedTypingHub : Hub
@@ -12,7 +13,7 @@ namespace GamingPlatform.Hubs
         private readonly GamingPlatformContext _context;
         private readonly LobbyService _lobbyService;
         private readonly ILogger<SpeedTypingHub> _logger;
-        private readonly ConcurrentDictionary<string, string> _connectionToPseudo;
+        public readonly ConcurrentDictionary<string, string> _connectionToPseudo;
 
         public SpeedTypingHub(
             GamingPlatformContext context,
@@ -25,6 +26,7 @@ namespace GamingPlatform.Hubs
             _lobbyService = lobbyService ?? throw new ArgumentNullException(nameof(lobbyService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _connectionToPseudo = connectionToPseudo ?? throw new ArgumentNullException(nameof(connectionToPseudo));
+            game.SetConnectionToPseudo(_connectionToPseudo); // Passer le dictionnaire à SpeedTyping
             _logger.LogInformation("SpeedTypingHub instantiated successfully.");
             _context = context;
         }
@@ -60,13 +62,9 @@ namespace GamingPlatform.Hubs
 
             try
             {
-                // Associer le pseudo à la connexion
-                _connectionToPseudo[Context.ConnectionId] = pseudo;
+                _connectionToPseudo[Context.ConnectionId] = pseudo; // Associer le pseudo à l'identifiant de connexion
 
-                // Ajouter la connexion au groupe
                 await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
-
-                // Associer le lobby au contexte
                 Context.Items["LobbyId"] = lobbyId;
 
                 _logger.LogInformation("Player '{Pseudo}' joined lobby '{LobbyId}'", pseudo, lobbyId);
@@ -78,48 +76,6 @@ namespace GamingPlatform.Hubs
                 throw;
             }
         }
-
-
-        public async Task<string> ValidatePseudo(string lobbyId, string pseudo)
-        {
-            if (string.IsNullOrWhiteSpace(lobbyId) || string.IsNullOrWhiteSpace(pseudo))
-                throw new ArgumentNullException("Lobby ID or Pseudo cannot be null.");
-
-            try
-            {
-                var lobby = _lobbyService.GetLobbyWithGameAndPlayers(Guid.Parse(lobbyId));
-                if (lobby == null)
-                {
-                    _logger.LogWarning("Lobby not found for ID: {LobbyId}", lobbyId);
-                    return "invalid"; // Lobby non trouvé
-                }
-
-                // Vérifiez si le pseudo est déjà associé à cette connexion
-                var currentPseudo = _connectionToPseudo.GetValueOrDefault(Context.ConnectionId);
-                _logger.LogInformation("Current pseudo for connection '{ConnectionId}': {CurrentPseudo}", Context.ConnectionId, currentPseudo);
-
-                if (!string.IsNullOrWhiteSpace(currentPseudo))
-                {
-                    if (currentPseudo.Equals(pseudo, StringComparison.OrdinalIgnoreCase))
-                    {
-                        _logger.LogInformation("Pseudo '{Pseudo}' is the same as the current pseudo for connection '{ConnectionId}'", pseudo, Context.ConnectionId);
-                        return "same"; // Même pseudo
-                    }
-                }
-
-                // Vérifier si le pseudo existe déjà dans le lobby
-                var isPseudoInLobby = lobby.LobbyPlayers.Any(lp => lp.Player.Pseudo.Equals(pseudo, StringComparison.OrdinalIgnoreCase));
-                _logger.LogInformation("Pseudo '{Pseudo}' validation result for lobby '{LobbyId}': {IsValid}", pseudo, lobbyId, isPseudoInLobby);
-
-                return isPseudoInLobby ? "valid" : "invalid"; // Valide ou invalide
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error validating pseudo '{Pseudo}' for lobby '{LobbyId}'", pseudo, lobbyId);
-                throw;
-            }
-        }
-
 
         public async Task InitializeLobbyPlayers(string lobbyId)
         {
@@ -186,14 +142,20 @@ namespace GamingPlatform.Hubs
             try
             {
                 await _game.CheckProgress(Context.ConnectionId, typedText);
-                _logger.LogInformation("Progress updated for connection '{ConnectionId}'", Context.ConnectionId);
+
+                // Récupérer le pseudo associé à la connexion
+                var pseudo = _connectionToPseudo.GetValueOrDefault(Context.ConnectionId, "Unknown");
+
+                _logger.LogInformation("Progress updated for player '{Pseudo}' with connection '{ConnectionId}'", pseudo, Context.ConnectionId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating progress for connection '{ConnectionId}'", Context.ConnectionId);
+                var pseudo = _connectionToPseudo.GetValueOrDefault(Context.ConnectionId, "Unknown");
+                _logger.LogError(ex, "Error updating progress for player '{Pseudo}' with connection '{ConnectionId}'", pseudo, Context.ConnectionId);
                 throw;
             }
         }
+
 
         public async Task SendMessage(string message)
         {
@@ -241,19 +203,46 @@ namespace GamingPlatform.Hubs
 
             await base.OnDisconnectedAsync(exception);
         }
-
-
         public async Task BroadcastScores(Dictionary<string, int> scores)
         {
-            await Clients.All.SendAsync("ScoreUpdate", scores);
-        }
+            var formattedScores = scores
+            .Where(kvp => !double.IsInfinity(kvp.Value) && !double.IsNaN(kvp.Value))
+            .ToDictionary(
+                kvp => _connectionToPseudo.GetValueOrDefault(kvp.Key, "Unknown"),
+                kvp => kvp.Value
+            );
+            foreach (var kvp in scores)
+            {
+                if (double.IsInfinity(kvp.Value) || double.IsNaN(kvp.Value))
+                {
+                    _logger.LogWarning("Invalid numeric value detected for key {Key}: {Value}", kvp.Key, kvp.Value);
+                }
+            }
 
+            await Clients.All.SendAsync("ScoreUpdate", formattedScores);
+
+
+        }
         public async Task EndGame(List<PlayerScore> leaderboard)
         {
             try
             {
                 _logger.LogInformation("Game Over. Sending leaderboard to clients.");
-                await Clients.All.SendAsync("GameOver", leaderboard);
+                _logger.LogInformation("Current _connectionToPseudo mapping: {@_connectionToPseudo}", _connectionToPseudo);
+
+                // Mapper les scores avec leurs pseudos
+                var leaderboardWithPseudos = leaderboard.Select(playerScore => new
+                {
+                    playerId = playerScore.PlayerId,
+                    pseudo = _connectionToPseudo.TryGetValue(playerScore.PlayerId, out var pseudo) ? pseudo : "Unknown", // Vérifiez ici
+                    wpm = playerScore.WPM,
+                    accuracy = playerScore.Accuracy,
+                    score = playerScore.Score
+                }).ToList();
+
+                _logger.LogInformation("Leaderboard with pseudos: {@leaderboardWithPseudos}", leaderboardWithPseudos);
+
+                await Clients.All.SendAsync("GameOver", leaderboardWithPseudos);
             }
             catch (Exception ex)
             {
@@ -261,12 +250,54 @@ namespace GamingPlatform.Hubs
                 throw;
             }
         }
-
-        public async Task SaveScores(List<Score> scores)
+        public async Task SaveScores(List<Score> scores, Guid lobbyId)
         {
-            await _context.Score.AddRangeAsync(scores);
-            await _context.SaveChangesAsync();
+            _logger.LogInformation("Received scores: {@Scores}, LobbyId: {LobbyId}", scores, lobbyId);
+
+            if (scores == null || scores.Any(score => score == null))
+            {
+                _logger.LogError("Invalid scores data received");
+                throw new InvalidDataException("One or more scores are null or improperly formatted.");
+            }
+
+            if (lobbyId == Guid.Empty)
+            {
+                _logger.LogError("Invalid lobbyId received: {LobbyId}", lobbyId);
+                throw new ArgumentNullException(nameof(lobbyId));
+            }
+
+            try
+            {
+                _logger.LogInformation("Processing {ScoreCount} scores for lobby {LobbyId}", scores.Count, lobbyId);
+
+                // Mapper les scores en ajoutant les détails nécessaires à la base de données
+                var scoresToSave = scores.Select(score => new Score
+                {
+                    LobbyId = lobbyId,
+                    PlayerId = score.PlayerId,
+                    Pseudo = _connectionToPseudo.GetValueOrDefault(score.PlayerId, "Unknown"),
+                    WPM = score.WPM,
+                    Accuracy = score.Accuracy,
+                    Difficulty = score.Difficulty,
+                    DatePlayed = DateTime.UtcNow
+                }).ToList();
+
+                _logger.LogDebug("Mapped scores: {@ScoresToSave}", scoresToSave);
+
+                // Sauvegarder les scores dans la base de données
+                await _context.Score.AddRangeAsync(scoresToSave);
+                var savedCount = await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Successfully saved {SavedCount} scores for lobby {LobbyId}", savedCount, lobbyId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to save scores for lobby {LobbyId}", lobbyId);
+                throw;
+            }
         }
+
+
 
     }
 }

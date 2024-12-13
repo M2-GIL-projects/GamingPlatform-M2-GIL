@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
+
 
 namespace GamingPlatform.Models
 {
@@ -16,6 +18,10 @@ namespace GamingPlatform.Models
         public int TimeLimit { get; private set; }
         public Difficulty CurrentDifficulty { get; private set; }
 
+        private ConcurrentDictionary<string, string> _connectionToPseudo;
+
+        //private readonly Dictionary<string, string> _connectionToPseudo = new Dictionary<string, string>();
+
 
         private readonly IHubContext<SpeedTypingHub> _hubContext;
         private Dictionary<string, PlayerStats> _playerStats = new Dictionary<string, PlayerStats>();
@@ -24,6 +30,11 @@ namespace GamingPlatform.Models
         {
             _hubContext = hubContext;
             TextToType = string.Empty;
+        }
+
+        public void SetConnectionToPseudo(ConcurrentDictionary<string, string> connectionToPseudo)
+        {
+            _connectionToPseudo = connectionToPseudo ?? throw new ArgumentNullException(nameof(connectionToPseudo));
         }
 
         public void InitializeBoard(Difficulty difficulty)
@@ -102,20 +113,18 @@ namespace GamingPlatform.Models
         private async Task EndGame()
         {
             IsGameStarted = false;
-            var leaderboard = _playerStats.OrderByDescending(p => p.Value.WPM).Take(10)
-                .Select(p => new Score
-                {
-                    Id = Guid.NewGuid(),
-                    LobbyId = Guid.Empty, // Vous devrez ajouter la logique pour obtenir le LobbyId
-                    PlayerPseudo = p.Key,
-                    WPM = p.Value.WPM,
-                    Accuracy = p.Value.Accuracy,
-                    RawScore = CalculatePoints(p.Value.WPM, p.Value.Accuracy, Difficulty.Easy),
-                    AdjustedScore = CalculatePoints(p.Value.WPM, p.Value.Accuracy, CurrentDifficulty),
-                    Difficulty = CurrentDifficulty,
-                    Timestamp = DateTime.UtcNow
-                })
-                .ToList();
+
+            var leaderboard = _playerStats
+            .OrderByDescending(p => p.Value.WPM)
+            .Select(p => new
+            {
+                PlayerId = p.Key, // p.Key est déjà Context.ConnectionId
+                Pseudo = _connectionToPseudo.TryGetValue(p.Key, out var pseudo) ? pseudo : "Unknown",
+                WPM = p.Value.WPM,
+                Accuracy = p.Value.Accuracy,
+                Score = CalculatePoints(p.Value.WPM, p.Value.Accuracy, CurrentDifficulty)
+            })
+            .ToList();
             await _hubContext.Clients.All.SendAsync("GameOver", leaderboard);
         }
 
