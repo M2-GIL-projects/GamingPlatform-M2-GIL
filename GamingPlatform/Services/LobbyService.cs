@@ -147,17 +147,18 @@ namespace GamingPlatform.Services
 
                 if (lobby == null)
                 {
-                    return new NotFoundObjectResult("Lobby introuvable");
+                    return new NotFoundObjectResult(new { Message = "Lobby introuvable" });
                 }
 
                 if (lobby.Status != LobbyStatus.Waiting)
                 {
-                    return new BadRequestObjectResult("Le lobby n'est pas en attente.");
+            
+                    return new BadRequestObjectResult(new { Message = "Le lobby n'est pas en attente. il est en: {lobby.Status}" });
                 }
 
                 lobby.Status = LobbyStatus.InProgress;
                 UpdateLobby(lobby);
-                string redirectUrl = null;
+
                 switch (lobby.Code)
                 {
                     case "SPT":
@@ -171,17 +172,20 @@ namespace GamingPlatform.Services
 
                             hubContext.Clients.Group(lobbyId.ToString()).SendAsync("GameStarted", speedTypingGame.TextToType, speedTypingGame.TimeLimit);
 
-                            redirectUrl = $"/Game/SpeedTyping/Play/{lobbyId}";
-                            return new OkObjectResult("Partie de Speed Typing démarrée");
+                            return new OkObjectResult(new
+                            {
+                                Message = "Partie de Speed Typing démarrée",
+                                RedirectUrl = $"/Game/SpeedTyping/Play/{lobbyId}"
+                            });
                         }
 
                     default:
-                        return new BadRequestObjectResult($"Le type de jeu avec le code {lobby.Code} n'est pas pris en charge.");
+                        return new BadRequestObjectResult(new { Message = $"Le type de jeu avec le code {lobby.Code} n'est pas pris en charge." });
                 }
             }
             catch (Exception ex)
             {
-                return new ObjectResult($"Une erreur est survenue : {ex.Message}") { StatusCode = 500 };
+                return new ObjectResult(new { Message = $"Une erreur est survenue : {ex.Message}" }) { StatusCode = 500 };
             }
         }
 

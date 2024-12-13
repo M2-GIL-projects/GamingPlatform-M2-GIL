@@ -349,6 +349,11 @@
 
             const leaderboardModal = new bootstrap.Modal(document.getElementById('leaderboardModal'));
             leaderboardModal.show();
+
+             // Fermer le modal après 10 secondes
+            setTimeout(() => {
+                leaderboardModal.hide();
+            }, 10000); // 10000 millisecondes = 10 secondes
         });
 
         connection.on("DifficultyChanged", (difficulty) => {
@@ -443,7 +448,6 @@
                 alert("Échec de la sauvegarde des scores. Veuillez réessayer.");
             }
         }
-
 
         async function startGame() {
             try {

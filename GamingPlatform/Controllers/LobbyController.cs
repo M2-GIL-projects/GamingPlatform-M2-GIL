@@ -164,9 +164,8 @@ namespace GamingPlatform.Controllers
         [HttpPost]
         public IActionResult Start(Guid id)
         {
-            _lobbyService.StartGame(id);
-
-            return Ok();
+            var result = _lobbyService.StartGame(id);
+            return result;
         }
 
         public async Task<Player> GetCurrentPlayer()
