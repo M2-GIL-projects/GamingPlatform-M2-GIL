@@ -58,7 +58,8 @@
             </ul>
             <!-- Si le lobby est privé, afficher le lien d'invitation -->
 
-            <div class="mt-4">
+             @if(Model.Game != null && Model.Game.Name != "PetitBac"){
+                <div class="mt-4">
                 <h4>Inviter un joueur :</h4>
                 <p>Copiez et envoyez ce lien à vos amis pour les inviter dans ce lobby :</p>
                 <div class="input-group">
@@ -68,13 +69,21 @@
                     <button class="btn btn-outline-secondary" type="button" onclick="copyInviteLink()">Copier</button>
                 </div>
             </div>
+             }
 
-
+        
             <!-- Actions basées sur le status -->
             <div class="mt-4 text-center">
                 @if (Model.Status == GamingPlatform.Models.LobbyStatus.Waiting)
                 {
-                    <button class="btn btn-primary" onclick="startGame('@Model.Id')">Lancer le jeu</button>
+                     @if (Model.Game != null && Model.Game.Name == "PetitBac")
+                    {
+                        <!-- Redirection vers la configuration pour Petit Bac -->
+                            <a href="@Url.Action("Configure", "PetitBac", new { lobbyId = Model.Id })" class="btn btn-primary">Configurer le jeu</a>
+                    }else{
+                        <button class="btn btn-primary" onclick="startGame('@Model.Id')">Lancer le jeu</button>
+                    }
+                    
                 }
                 else if (Model.Status == GamingPlatform.Models.LobbyStatus.InProgress)
                 {
@@ -83,6 +92,8 @@
                         <a href="/Game/@Model.Game.Name/Play/@Model.Id" class="btn btn-success">
                             Rejoindre le plateau de jeu
                         </a>
+                    } else if (@Model.Game.Name == "PetitBac"){
+                          <a href="@Url.Action("Configure", "PetitBac", new { lobbyId = Model.Id })" class="btn btn-primary">Configurer le jeu</a>
                     }
                     
                     else

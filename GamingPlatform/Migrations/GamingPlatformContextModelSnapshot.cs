@@ -109,6 +109,107 @@ namespace GamingPlatform.Migrations
                     b.ToTable("LobbyPlayer");
                 });
 
+            modelBuilder.Entity("GamingPlatform.Models.PetitBacCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PetitBacGameId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PetitBacGameId");
+
+                    b.ToTable("PetitBacCategories");
+                });
+
+            modelBuilder.Entity("GamingPlatform.Models.PetitBacGame", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatorPseudo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsGameStarted")
+                        .HasColumnType("bit");
+
+                    b.PrimitiveCollection<string>("Letters")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("LobbyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PlayerCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LobbyId")
+                        .IsUnique();
+
+                    b.ToTable("PetitBacGames");
+                });
+
+            modelBuilder.Entity("GamingPlatform.Models.PetitBacPlayer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsReady")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PetitBacGameId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Pseudo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ResponsesJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Score")
+                        .HasColumnType("float");
+
+                    b.Property<string>("SessionToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PetitBacGameId");
+
+                    b.ToTable("PetitBacPlayer");
+                });
+
             modelBuilder.Entity("GamingPlatform.Models.Player", b =>
                 {
                     b.Property<int>("Id")
@@ -222,9 +323,51 @@ namespace GamingPlatform.Migrations
                     b.Navigation("Player");
                 });
 
+            modelBuilder.Entity("GamingPlatform.Models.PetitBacCategory", b =>
+                {
+                    b.HasOne("GamingPlatform.Models.PetitBacGame", "PetitBacGame")
+                        .WithMany("Categories")
+                        .HasForeignKey("PetitBacGameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PetitBacGame");
+                });
+
+            modelBuilder.Entity("GamingPlatform.Models.PetitBacGame", b =>
+                {
+                    b.HasOne("GamingPlatform.Models.Lobby", "Lobby")
+                        .WithOne("PetitBacGame")
+                        .HasForeignKey("GamingPlatform.Models.PetitBacGame", "LobbyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lobby");
+                });
+
+            modelBuilder.Entity("GamingPlatform.Models.PetitBacPlayer", b =>
+                {
+                    b.HasOne("GamingPlatform.Models.PetitBacGame", "PetitBacGame")
+                        .WithMany("Players")
+                        .HasForeignKey("PetitBacGameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PetitBacGame");
+                });
+
             modelBuilder.Entity("GamingPlatform.Models.Lobby", b =>
                 {
                     b.Navigation("LobbyPlayers");
+
+                    b.Navigation("PetitBacGame");
+                });
+
+            modelBuilder.Entity("GamingPlatform.Models.PetitBacGame", b =>
+                {
+                    b.Navigation("Categories");
+
+                    b.Navigation("Players");
                 });
 
             modelBuilder.Entity("GamingPlatform.Models.Player", b =>

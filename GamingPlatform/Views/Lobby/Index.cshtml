@@ -1,5 +1,5 @@
 @model IEnumerable<GamingPlatform.Models.Lobby>
-
+<script src="/js/petitBac/link.js"></script>
 @{
     ViewData["Title"] = "Liste des Lobbies";
 }
@@ -10,6 +10,7 @@
     <!-- Bouton pour ouvrir le modal de création de lobby -->
     <a type="button" class="btn btn-success mb-4" href="/lobby/create/select">
         Créer un Nouveau Lobby
+
     </a>
     <!-- Section de Filtres -->
     <div class="card mb-4">
@@ -60,6 +61,7 @@
                     <th>Statut</th>
                     <th>Type</th>
                     <th>Date de Création</th>
+
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -126,7 +128,9 @@
                             <td>@lobby.Name</td>
                             <td>@lobby.Game?.Name</td>
                             <td>@lobby.Status</td>
+
                             <td>@(lobby.IsPrivate ? "Privé" : "Public")</td>
+
                             <td>@lobby.CreatedAt.ToString("g")</td>
                             <td>
                                 <a class="btn btn-sm btn-warning" href="/Lobby/ResumeLobby/@lobby.Id">Reprendre</a>
@@ -138,6 +142,7 @@
                 {
                     <tr>
                         <td colspan="6" class="text-center">Vous ne participez à aucun lobby privé.</td>
+
                     </tr>
                 }
             </tbody>

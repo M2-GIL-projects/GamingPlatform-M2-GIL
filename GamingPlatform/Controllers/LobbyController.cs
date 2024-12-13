@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using GamingPlatform.Models;
 using Microsoft.Data.SqlClient;
 
+using GamingPlatform.Data;
+
+
 namespace GamingPlatform.Controllers
 {
     public class LobbyController : Controller
@@ -11,12 +14,14 @@ namespace GamingPlatform.Controllers
         private readonly LobbyService _lobbyService;
         private readonly GameService _gameService;
         private readonly PlayerService _playerService;
+        private readonly GamingPlatformContext _context;
 
-        public LobbyController(LobbyService lobbyService, GameService gameService, PlayerService playerService)
+        public LobbyController(LobbyService lobbyService, GameService gameService, PlayerService playerService, GamingPlatformContext context)
         {
             _lobbyService = lobbyService;
             _gameService = gameService;
             _playerService = playerService;
+            _context = context;
         }
 
         public async Task<IActionResult> Index(string? name, string? gameCode, LobbyStatus? status)

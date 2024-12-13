@@ -125,6 +125,76 @@ namespace GamingPlatform.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "PetitBacGames",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Letters = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsGameStarted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatorPseudo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PlayerCount = table.Column<int>(type: "int", nullable: false),
+                    LobbyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PetitBacGames", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PetitBacGames_Lobby_LobbyId",
+                        column: x => x.LobbyId,
+                        principalTable: "Lobby",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PetitBacCategories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PetitBacGameId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PetitBacCategories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PetitBacCategories_PetitBacGames_PetitBacGameId",
+                        column: x => x.PetitBacGameId,
+                        principalTable: "PetitBacGames",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PetitBacPlayer",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Pseudo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SessionToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ResponsesJson = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Score = table.Column<double>(type: "float", nullable: false),
+                    IsReady = table.Column<bool>(type: "bit", nullable: false),
+                    JoinedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PetitBacGameId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PetitBacPlayer", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PetitBacPlayer_PetitBacGames_PetitBacGameId",
+                        column: x => x.PetitBacGameId,
+                        principalTable: "PetitBacGames",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Game_Code",
                 table: "Game",
@@ -140,6 +210,22 @@ namespace GamingPlatform.Migrations
                 name: "IX_LobbyPlayer_LobbyId",
                 table: "LobbyPlayer",
                 column: "LobbyId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PetitBacCategories_PetitBacGameId",
+                table: "PetitBacCategories",
+                column: "PetitBacGameId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PetitBacGames_LobbyId",
+                table: "PetitBacGames",
+                column: "LobbyId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PetitBacPlayer_PetitBacGameId",
+                table: "PetitBacPlayer",
+                column: "PetitBacGameId");
         }
 
         /// <inheritdoc />
@@ -149,16 +235,25 @@ namespace GamingPlatform.Migrations
                 name: "LobbyPlayer");
 
             migrationBuilder.DropTable(
+                name: "PetitBacCategories");
+
+            migrationBuilder.DropTable(
+                name: "PetitBacPlayer");
+
+            migrationBuilder.DropTable(
                 name: "Score");
 
             migrationBuilder.DropTable(
                 name: "Sentences");
 
             migrationBuilder.DropTable(
-                name: "Lobby");
+                name: "Player");
 
             migrationBuilder.DropTable(
-                name: "Player");
+                name: "PetitBacGames");
+
+            migrationBuilder.DropTable(
+                name: "Lobby");
 
             migrationBuilder.DropTable(
                 name: "Game");

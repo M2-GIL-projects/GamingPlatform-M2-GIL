@@ -6,15 +6,20 @@ using GamingPlatform.Models;
 using System.Collections.Concurrent;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<GamingPlatformContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("GamingPlatformContext") ?? throw new InvalidOperationException("Connection string 'GamingPlatformContext' not found.")));
 
-// Add services to the container.
+// Configuration du contexte de base de données
+builder.Services.AddDbContext<GamingPlatformContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("GamingPlatformContext") ?? 
+        throw new InvalidOperationException("Connection string 'GamingPlatformContext' not found.")));
+
+// Ajout des services au conteneur
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddSignalR(options =>
 {
     options.EnableDetailedErrors = true;
 });
+
 builder.Services.AddScoped<GameService>();
 builder.Services.AddScoped<LobbyService>();
 builder.Services.AddScoped<PlayerService>();
@@ -24,8 +29,10 @@ builder.Services.AddSingleton(new ConcurrentDictionary<string, string>());
 
 builder.Services.AddSession(options =>
 {
+
     options.IdleTimeout = TimeSpan.FromMinutes(90); // Dur�e de la session
     options.Cookie.HttpOnly = true; // S�curiser le cookie
+
 });
 
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -36,16 +43,13 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 var app = builder.Build();
 
-
-// Configure the HTTP request pipeline.
+// Configurez le pipeline des requêtes HTTP
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
-// Initialiser les donn�es
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -55,20 +59,19 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-app.UseSession(); 
+app.UseSession();
 
 app.UseRouting();
-
 app.UseAuthorization();
 
+// Mapping des routes de contrôleur
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "game-details",
-    pattern: "game/details/{id?}",
+    pattern: "game/details/{id:guid}",
     defaults: new { controller = "Game", action = "Details" });
 
 app.MapControllerRoute(
@@ -82,9 +85,10 @@ app.MapControllerRoute(
     defaults: new { controller = "Lobby", action = "CreateFromGame" });
 
 app.MapControllerRoute(
-        name: "gameLobbies",
-        pattern: "game/{gameCode}/lobbies",
-        defaults: new { controller = "Game", action = "LobbiesByGameCode" });
+    name: "gameLobbies",
+    pattern: "game/{gameCode}/lobbies",
+    defaults: new { controller = "Game", action = "LobbiesByGameCode" });
+
 
 app.MapHub<ChatHub>("/chatHub");
 app.MapHub<LabyrinthHub>("/labyrinthHub");
@@ -93,4 +97,20 @@ app.MapHub<MorpionHub>("/MorpionHub");
 // Redirection pour le speed Typing game
 app.MapHub<SpeedTypingHub>("/SpeedTypingHub");
 
+// Nouvelle route pour PetitBacController.Configure
+app.MapControllerRoute(
+    name: "petitbac-configure",
+    pattern: "petitbac/configure",
+    defaults: new { controller = "PetitBac", action = "Configure" });
+
+app.MapControllerRoute(
+    name: "recapitulatif",
+    pattern: "PetitBac/Recapitulatif/{gameId}",
+    defaults: new { controller = "PetitBac", action = "Recapitulatif" });
+
+
+// Ajout des hubs SignalR
+app.MapHub<PetitBacHub>("/petitbachub"); 
+
+// Lancer l'application
 app.Run();
