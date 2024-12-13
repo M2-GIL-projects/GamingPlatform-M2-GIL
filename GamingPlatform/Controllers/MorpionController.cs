@@ -22,18 +22,37 @@ namespace GamingPlatform.Controllers
         public IActionResult Play(Guid lobbyId)
         {
             var lobby = _lobbyService.GetLobbyWithGameAndPlayers(lobbyId);
+
             if (lobby == null)
             {
                 _logger.LogError($"Lobby ID {lobbyId} introuvable.");
                 return NotFound("Lobby introuvable.");
             }
 
-            // Passer les informations nécessaires à la vue via ViewData
-            ViewData["LobbyId"] = lobbyId;
-            ViewData["PlayerPseudos"] = lobby.LobbyPlayers.Select(p => p.Player.Pseudo).ToList();
+            var playerPseudos = lobby.LobbyPlayers.Select(p => p.Player.Pseudo).ToList();
 
-            _logger.LogInformation($"Lobby {lobbyId} chargé pour Morpion avec les joueurs : {string.Join(", ", ViewData["PlayerPseudos"])}.");
-            return View("Play");
+            if (playerPseudos.Count < 2)
+            {
+                _logger.LogError($"Le lobby ID {lobbyId} n'a pas assez de joueurs pour commencer.");
+                return BadRequest("Au moins deux joueurs sont nécessaires pour commencer.");
+            }
+
+            var morpion = new Morpion
+            {
+                LobbyId = lobbyId,
+                CurrentPlayer = playerPseudos[0],
+                PlayerX = playerPseudos[0],
+                PlayerO = playerPseudos[1],
+                CurrentPlayerName = playerPseudos[0]
+            };
+
+            ViewData["LobbyId"] = lobbyId.ToString();
+            ViewData["PlayerX"] = morpion.PlayerX;
+            ViewData["PlayerO"] = morpion.PlayerO;
+            ViewData["CurrentPlayer"] = morpion.CurrentPlayer;
+
+            _logger.LogInformation($"Lobby {lobbyId} chargé pour Morpion avec {morpion.PlayerX} (X) et {morpion.PlayerO} (O).");
+            return View(morpion);
         }
     }
 }

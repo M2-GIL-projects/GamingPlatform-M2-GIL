@@ -1,59 +1,126 @@
 using Microsoft.AspNetCore.SignalR;
-using System;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using GamingPlatform.Models;
 
 namespace GamingPlatform.Hubs
 {
     public class MorpionHub : Hub
     {
-        private static readonly Morpion GameBoard = new Morpion();
-        private static string CurrentPlayer = "X"; // X commence toujours
+        private static readonly Dictionary<string, Lobby> Lobbies = new();
 
-        public MorpionHub()
+        public async Task JoinLobby(string lobbyId)
         {
-            GameBoard.InitializeBoard();
-        }
+            if (!Lobbies.ContainsKey(lobbyId))
+            {
+                Lobbies[lobbyId] = new Lobby();
+            }
 
-        public async Task JoinGame(string lobbyId, string playerName)
-        {
             await Groups.AddToGroupAsync(Context.ConnectionId, lobbyId);
-            await Clients.Group(lobbyId).SendAsync("PlayerJoined", playerName);
+            await Clients.Group(lobbyId).SendAsync("PlayerJoined", lobbyId);
         }
 
-        public async Task MakeMove(string lobbyId, int x, int y, string playerSymbol)
-{
-    try
-    {
-        // Vérifie si le joueur actuel peut jouer
-        if (playerSymbol != CurrentPlayer)
+        public async Task MakeMove(string lobbyId, int row, int col)
         {
-            await Clients.Caller.SendAsync("Error", "Ce n'est pas votre tour !");
-            return;
+            if (!Lobbies.ContainsKey(lobbyId)) return;
+
+            var lobby = Lobbies[lobbyId];
+            
+            if (lobby.Board[row, col] != null || lobby.IsGameOver)
+            {
+                await Clients.Caller.SendAsync("InvalidMove", "Mouvement invalide.");
+                return;
+            }
+
+            lobby.Board[row, col] = lobby.CurrentPlayer;
+
+            await Clients.Group(lobbyId).SendAsync("ReceiveMove", row, col, lobby.CurrentPlayer);
+
+            if (CheckForWin(lobby.Board, lobby.CurrentPlayer))
+            {
+                lobby.IsGameOver = true;
+                lobby.Winner = lobby.CurrentPlayer;
+                string winnerSymbol = lobby.CurrentPlayer;
+                await Clients.Group(lobbyId).SendAsync("GameOver", winnerSymbol);
+                return;
+
+            }
+
+            if (IsBoardFull(lobby.Board))
+            {
+                lobby.IsGameOver = true;
+                await Clients.Group(lobbyId).SendAsync("GameOver", "null");
+                return;
+            }
+            if (lobby.IsGameOver == false){
+
+                lobby.CurrentPlayer = lobby.CurrentPlayer == "X" ? "O" : "X";
+                await Clients.Group(lobbyId).SendAsync("UpdateCurrentPlayer", lobby.CurrentPlayer);
+             }
         }
 
-        // Effectue le mouvement sur le plateau
-        GameBoard.MakeMove(x, y, playerSymbol);
-
-        // Vérifie si le jeu est terminé
-        if (GameBoard.IsGameOver())
+        public async Task ResetGame(string lobbyId)
         {
-            await Clients.Group(lobbyId).SendAsync("GameOver", $"{playerSymbol} a gagné !");
+            if (!Lobbies.ContainsKey(lobbyId)) return;
+
+            var lobby = Lobbies[lobbyId];
+            lobby.Board = new string[3, 3];
+            lobby.CurrentPlayer = "X";
+            lobby.IsGameOver = false;
+            lobby.Winner = null;
+
+            await Clients.Group(lobbyId).SendAsync("ReceiveReset");
         }
-        else
+
+
+        private bool CheckForWin(string[,] board, string player)
         {
-            // Alterne le joueur actuel
-            CurrentPlayer = CurrentPlayer == "X" ? "O" : "X";
+            for (int i = 0; i < 3; i++)
+            {
+                if (board[i, 0] == player && board[i, 1] == player && board[i, 2] == player) return true;
+                if (board[0, i] == player && board[1, i] == player && board[2, i] == player) return true;
+            }
 
-            // Notifie les clients du groupe avec le plateau mis à jour
-            await Clients.Group(lobbyId).SendAsync("UpdateGame", GameBoard.RenderBoard(), CurrentPlayer);
+            if (board[0, 0] == player && board[1, 1] == player && board[2, 2] == player) return true;
+            if (board[0, 2] == player && board[1, 1] == player && board[2, 0] == player) return true;
+
+            return false;
         }
-    }
-    catch (Exception ex)
-    {
-        await Clients.Caller.SendAsync("Error", ex.Message);
-    }
-}
 
+        private bool IsBoardFull(string[,] board)
+        {
+            foreach (var cell in board)
+            {
+                if (cell == null) return false;
+            }
+            return true;
+        }
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ private class Lobby
+        {
+            public string[,] Board { get; set; } = new string[3, 3];
+            public string CurrentPlayer { get; set; } = "X";
+            public bool IsGameOver { get; set; } = false;
+            public string Winner { get; set; }
+            public string PlayerX { get; set; }
+            public string PlayerO { get; set; }
+        }
     }
 }
