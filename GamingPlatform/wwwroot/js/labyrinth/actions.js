@@ -1,6 +1,6 @@
 ﻿var connection = new signalR.HubConnectionBuilder().withUrl("/labyrinthHub").build();
 
-// Set up SignalR event listeners
+ //Set up SignalR event listeners
 connection.on("ReceivePlayerMovement", function (playerId, newCell) {
     if (playerId === 1) {
         player1Cell = newCell;
@@ -16,14 +16,14 @@ connection.on("EndGame", function (message) {
 
 // Start the SignalR connection
 connection.start().catch(function (err) {
-    return console.error(err.toString());
+    return console.error("Error with SignalR:", err.toString());
 });
 
-// Generate labyrinth
+// retrieve labyrinth
 var nRows = 25;
 var nCols = 25;
-var labyrinth = labyrinthgenerator(nRows, nCols);
-console.log("Labyrinth loaded:", labyrinth);
+
+
 
 // Initialize array to count number of times each player stepped in each location
 var floorTiles = Array(nRows * nCols).fill(0);
@@ -64,6 +64,7 @@ render();
 
 // Handles keyboard input
 function keyboardHandler(event) {
+    if (!gameReady) return; 
     if (!gameRunning && (event.keyCode >= 37 && event.keyCode <= 40 || event.keyCode >= 65 && event.keyCode <= 87)) {
         gameRunning = true;
     }
@@ -131,6 +132,8 @@ function endGame() {
 
 // Draws the labyrinth walls and heatmap of player steps
 function render() {
+    if (!gameReady) return; // Ne rien faire tant que le labyrinthe n'est pas prêt
+
     drawingSurface.clearRect(0, 0, canvas.width, canvas.height);
     for (var cell = 0; cell < nRows * nCols; cell++) {
         var cellRow = Math.floor(cell / nRows);

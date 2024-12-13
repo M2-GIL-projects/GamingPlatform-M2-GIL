@@ -1,41 +1,33 @@
-﻿body {
+﻿/* Style pour centrer le spinner */
+#loadingSpinner {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 1000;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0; /* Facultatif : pour donner un fond clair */
-}
-#labyrinth {
-    display: grid;
-    grid-template-columns: repeat(10, 30px); /* Ajustez la taille des cellules */
-    grid-template-rows: repeat(10, 30px); /* Ajustez la taille des cellules */
-    gap: 1px;
-    border: 2px solid black;
-    background-color: white;
-    border-radius: 5px; /* Optionnel : ajouter des bords arrondis */
 }
 
-.cell {
-    width: 30px;
-    height: 30px;
-    background-color: #ddd;
-    position: relative;
-    box-sizing: border-box;
+    #loadingSpinner .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #007bff;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+    }
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
-
-    .cell.wall-top {
-        border-top: 2px solid black;
-    }
-
-    .cell.wall-right {
-        border-right: 2px solid black;
-    }
-
-    .cell.wall-bottom {
-        border-bottom: 2px solid black;
-    }
-
-    .cell.wall-left {
-        border-left: 2px solid black;
-    }
