@@ -1,6 +1,5 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewBag.Title = "Page Sans Header et Footer";
     ViewBag.HideHeader = true;
     ViewBag.HideFooter = true;
 }
@@ -76,6 +75,7 @@
             <th>Pseudo</th>
             <th>Statut</th>
             <th>Actions</th>
+            <th>Score</th>
         </tr>
     </thead>
     <tbody id="player-list">
@@ -119,6 +119,7 @@
 </div>
 
 <div id="game-info" data-game-id="@Model.Id" data-session-token="@ViewBag.SessionToken"></div>
+
 
 <!-- Ajouter ici le script SignalR -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.0/signalr.min.js"></script>

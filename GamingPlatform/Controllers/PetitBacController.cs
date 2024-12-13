@@ -281,44 +281,93 @@ public async Task<IActionResult> SubmitAnswers(int gameId, int playerId, Diction
     }
 }
 
+       [HttpGet]
+        public IActionResult Confirmation(int gameId, int playerId)
+        {
+            var player = _context.PetitBacPlayer
+                .FirstOrDefault(p => p.Id == playerId && p.PetitBacGameId == gameId);
 
+            if (player == null)
+            {
+                return NotFound("Joueur introuvable ou invalide.");
+            }
 
-[HttpGet]
-public IActionResult Confirmation(int gameId, int playerId)
+            var game = _context.PetitBacGames
+                .Include(g => g.Categories)
+                .FirstOrDefault(g => g.Id == gameId);
+
+            if (game == null)
+            {
+                return NotFound("Partie introuvable.");
+            }
+
+            var viewModel = new ConfirmationViewModel
+            {
+                GameId = gameId,
+                PlayerId = playerId,
+                PlayerPseudo = player.Pseudo,
+                Categories = game.Categories.Select(c => c.Name).ToList(),
+                Score = player.Score
+            };
+
+            return View(viewModel);
+        }
+[HttpPost]
+[Route("PetitBac/SubmitScore")]
+public async Task<IActionResult> SubmitScore([FromBody] SubmitScoreRequest request)
 {
+    if (request == null)
+    {
+        Console.WriteLine("Requête invalide reçue.");
+        return BadRequest(new { message = "Requête invalide." });
+    }
+
+    // Validation du score
+    if (request.Score < 0 || request.Score > 100)
+    {
+        Console.WriteLine($"Score invalide : {request.Score}");
+        return BadRequest(new { message = "Le score doit être entre 0 et 100." });
+    }
+
+    // Récupérer le joueur en utilisant PlayerPseudo et GameId
     var player = _context.PetitBacPlayer
-        .FirstOrDefault(p => p.Id == playerId && p.PetitBacGameId == gameId);
+        .FirstOrDefault(p => p.Pseudo == request.PlayerPseudo && p.PetitBacGameId == request.GameId);
 
     if (player == null)
     {
-        return NotFound("Joueur introuvable ou invalide.");
+        Console.WriteLine($"Joueur introuvable : Pseudo={request.PlayerPseudo}, GameId={request.GameId}");
+        return NotFound(new { message = "Joueur introuvable ou invalide." });
     }
 
-    var game = _context.PetitBacGames
-        .Include(g => g.Categories)
-        .FirstOrDefault(g => g.Id == gameId);
-
-    if (game == null)
+    // Vérifier si le score a déjà été attribué pour éviter les mises à jour multiples
+    if (player.Score > 0)
     {
-        return NotFound("Partie introuvable.");
+        Console.WriteLine($"Le score a déjà été attribué : Pseudo={player.Pseudo}, Score={player.Score}");
+        return BadRequest(new { message = "Le score a déjà été attribué." });
     }
 
-    var viewModel = new ConfirmationViewModel
-    {
-        GameId = gameId,
-        PlayerId = playerId,
-        PlayerPseudo = player.Pseudo,
-        Categories = game.Categories.Select(c => c.Name).ToList()
-    };
+    // Mise à jour du score dans la base de données
+    player.Score = request.Score;
+    _context.SaveChanges();
 
-    return View(viewModel);
+    // Log des données mises à jour
+    Console.WriteLine($"Score mis à jour : Pseudo={player.Pseudo}, GameId={request.GameId}, Score={request.Score}");
+
+    // Envoyer le score via SignalR
+    await _hubContext.Clients.Group($"Game-{request.GameId}").SendAsync("ReceiveScore", player.Pseudo, request.Score);
+
+    // Retourner une réponse de succès
+    Console.WriteLine($"Score envoyé via SignalR : Pseudo={player.Pseudo}, Score={request.Score}");
+    return Ok(new { message = "Score mis à jour et envoyé avec succès." });
 }
+
 
 [HttpGet("api/petitbac/getPlayerAnswersByPseudo")]
 public IActionResult GetPlayerAnswersByPseudo(string playerPseudo)
 {
     try
     {
+        // Rechercher le joueur par son pseudo
         var player = _context.PetitBacPlayer.FirstOrDefault(p => p.Pseudo == playerPseudo);
         if (player == null)
         {
@@ -326,12 +375,14 @@ public IActionResult GetPlayerAnswersByPseudo(string playerPseudo)
             return NotFound(new { message = "Joueur introuvable." });
         }
 
+        // Vérifier si le joueur a des réponses
         if (string.IsNullOrEmpty(player.ResponsesJson))
         {
             Console.WriteLine($"Aucune réponse trouvée pour le joueur : {playerPseudo}");
             return Ok(new { pseudo = player.Pseudo, responses = new Dictionary<char, Dictionary<string, string>>() });
         }
 
+        // Désérialiser les réponses
         var responses = JsonSerializer.Deserialize<Dictionary<char, Dictionary<string, string>>>(player.ResponsesJson);
 
         return Ok(new { pseudo = player.Pseudo, responses });

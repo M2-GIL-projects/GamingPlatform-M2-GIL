@@ -26,5 +26,22 @@ public async Task NotifyStatusChange(string gameId, string playerPseudo, string 
     await Clients.Group(gameId).SendAsync("PlayerStatusUpdated", playerPseudo, status);
 }
 
+public async Task SendScore(string gameId, string playerPseudo, double score)
+{
+    Console.WriteLine($"SignalR - Envoi du score : GameId={gameId}, Pseudo={playerPseudo}, Score={score}");
+    await Clients.Group($"Game-{gameId}").SendAsync("ReceiveScore", playerPseudo, score);
+}
+
+public override async Task OnConnectedAsync()
+{
+    var gameId = Context.GetHttpContext()?.Request.Query["gameId"];
+    if (!string.IsNullOrEmpty(gameId))
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"Game-{gameId}");
+        Console.WriteLine($"Client connecté : {Context.ConnectionId}, ajouté au groupe Game-{gameId}");
+    }
+    await base.OnConnectedAsync();
+}
+
 
 }

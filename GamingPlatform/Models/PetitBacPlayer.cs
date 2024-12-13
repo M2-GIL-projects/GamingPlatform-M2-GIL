@@ -25,7 +25,7 @@ public string ResponsesJson
         : JsonSerializer.Deserialize<Dictionary<char, Dictionary<string, string>>>(value);
 }
 
-        public int Score { get; set; } = 0; // Score du joueur pour la partie
+        public double Score { get; set; }  // Score du joueur pour la partie
         public bool IsReady { get; set; } = false; // Indique si le joueur est prêt pour commencer
 
         // Date d'inscription à la partie

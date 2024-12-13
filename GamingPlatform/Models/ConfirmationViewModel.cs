@@ -6,5 +6,6 @@ namespace GamingPlatform.Models
         public int PlayerId { get; set; }
         public string PlayerPseudo { get; set; }
         public List<string> Categories { get; set; }
+        public double Score { get; set; } 
     }
 }
