@@ -156,6 +156,12 @@
                             <h2 class="h5">Paramètres du Jeu</h2>
                             <div class="row g-3">
                                 <div class="col-md-6">
+                                    <select id="language" class="form-select">
+                                        <option value="French">Français</option>
+                                        <option value="English">Anglais</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
                                     <select id="difficulty" class="form-select">
                                         <option value="Easy">Facile</option>
                                         <option value="Medium">Moyen</option>
@@ -165,6 +171,10 @@
                                 <div class="col-md-6">
                                     <button class="btn btn-primary w-100" onclick="startGame()">Lancer la
                                         Partie</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <a href="/lobby" class="btn btn-danger w-100">Quitter le jeu</a>
+                                   
                                 </div>
                             </div>
                         </div>
@@ -270,6 +280,7 @@
         const lobbyId = "@Model.LobbyId";
         let timeLeft;
         let timerInterval;
+        let isGameOver = false;
 
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/SpeedTypingHub", {
@@ -292,12 +303,13 @@
         });
 
         connection.on("ProgressUpdate", (isCorrect, progress, wpm, accuracy, score) => {
+            if (isGameOver) return; // Ne rien faire si la partie est terminée
             const progressBar = document.getElementById("progressBar");
             progressBar.style.width = progress + "%";
             progressBar.style.backgroundColor = isCorrect ? "green" : "red";
             document.getElementById("wpm").innerText = wpm;
             document.getElementById("accuracy").innerText = accuracy.toFixed(2);
-            document.getElementById("score").innerText = score; // Ajoutez un élément pour afficher le score
+            document.getElementById("score").innerText = score;
             if (!isCorrect) {
                 playErrorSound();
             }
@@ -312,6 +324,12 @@
         });
 
         connection.on("GameOver", (leaderboard) => {
+             isGameOver = true; // Marquer le jeu comme terminé
+             clearInterval(timerInterval); // Stopper le chronomètre si nécessaire
+            document.getElementById("userInput").value = "";
+            document.getElementById("userInput").disabled = true;
+            document.getElementById("textToType").value = "";
+            document.getElementById("progressBar").style.width = "0%";
 
             const leaderboardTableBody = document.getElementById("leaderboardTableBody");
             leaderboardTableBody.innerHTML = "";
@@ -360,6 +378,12 @@
             console.log(`Difficulty changed to: ${difficulty}`);
             const difficultySelect = document.getElementById("difficulty");
             difficultySelect.value = difficulty;
+        });
+
+        connection.on("LanguageChanged", (language) => {
+            console.log(`Language changed to: ${language}`);
+            const languageSelect = document.getElementById("language");
+            languageSelect.value = language;
         });
 
         connection.start().then(async () => {
@@ -457,9 +481,16 @@
                     return;
                 }
 
-                console.log(`difficulty=${difficulty}`);
+                const language = document.getElementById("language").value;
+                if (!["English", "French"].includes(language)) {
+                    alert("Langue invalide !");
+                    return;
+                }
 
-                await connection.invoke("StartGame", difficulty);
+                console.log(`difficulty=${difficulty}`);
+                console.log(`language=${language}`);
+
+                await connection.invoke("StartGame", difficulty, language);
                 console.log("Game started successfully.");
             } catch (error) {
                 console.error("Failed to start game:", error);
@@ -504,6 +535,17 @@
             } catch (error) {
                 console.error("Failed to change difficulty:", error);
                 alert("Erreur lors du changement de difficulté : " + (error.message || "Une erreur inconnue est survenue."));
+            }
+        });
+
+        document.getElementById("language").addEventListener("change", async (event) => {
+            const newLanguage = event.target.value;
+            try {
+                await connection.invoke("ChangeLanguage", newLanguage);
+                console.log(`Language set to: ${newLanguage}`);
+            } catch (error) {
+                console.error("Failed to change language:", error);
+                alert("Erreur lors du changement de Langue : " + (error.message || "Une erreur inconnue est survenue."));
             }
         });
 

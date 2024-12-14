@@ -20,7 +20,6 @@ namespace GamingPlatform.Data
         public DbSet<LobbyPlayer> LobbyPlayer { get; set; }
 
         public DbSet<Score> Score { get; set; }
-        public DbSet<Sentence> Sentences { get; set; }
         public DbSet<PetitBacGame> PetitBacGames { get; set; }
         public DbSet<PetitBacPlayer> PetitBacPlayer { get; set; }      
         public DbSet<PetitBacCategory> PetitBacCategories { get; set; }

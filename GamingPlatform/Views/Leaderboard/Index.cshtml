@@ -1,7 +1,7 @@
 @model List<IGrouping<string, Score>>
 
 <div class="container mt-5">
-    <h1 class="text-center text-primary mb-3">Leaderboards</h1>
+    <h1 class="text-center text-primary mb-3">Classements par jeu</h1>
 
     @if (Model == null || !Model.Any())
     {
@@ -15,7 +15,7 @@
         {
             <div class="card shadow mb-4">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h2 class="h5 mb-0">Type de jeu : @(string.IsNullOrEmpty(gameGroup.Key) ? "Non spécifié" : gameGroup.Key)</h2>
+                    <h2 class="h5 mb-0">Jeu : @(string.IsNullOrEmpty(gameGroup.Key) ? "Non spécifié" : gameGroup.Key)</h2>
                     <span class="badge bg-light text-primary">@gameGroup.Count() joueurs</span>
                 </div>
                 <div class="card-body">
@@ -44,7 +44,7 @@
                                             </div>
                                         </td>
                                         <td>@score.Score.WPM</td>
-                                        <td>@score.Score.Accuracy.ToString("P2")</td>
+                                        <td>@score.Score.Accuracy.ToString("F2")%</td>
                                         <td>@score.Score.DatePlayed.ToShortDateString()</td>
                                     </tr>
                                 }
@@ -59,10 +59,3 @@
         }
     }
 </div>
-
-<style>
-    .avatar {
-        font-weight: bold;
-        text-transform: uppercase;
-    }
-</style>

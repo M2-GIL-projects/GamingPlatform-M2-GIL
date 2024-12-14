@@ -229,21 +229,21 @@ namespace GamingPlatform.Services
         }
 
 
-        public List<IGrouping<string?, Score>> GetTopScoresPerGame(int topCount = 5)
+        public List<IGrouping<string, Score>> GetTopScoresPerGame(int topCount = 5)
         {
             var scoresWithGameType = _context.Score
                 .Join(_context.Lobby,
                     score => score.LobbyId,
                     lobby => lobby.Id,
-                    (score, lobby) => new { Score = score, GameType = lobby.GameType })
-                .ToList();
-
-            return scoresWithGameType
+                    (score, lobby) => new { Score = score, GameType = lobby.Game.Name })
+                .AsEnumerable()
                 .GroupBy(x => x.GameType)
                 .Select(group => new
                 {
                     GameType = group.Key,
                     TopScores = group
+                        .GroupBy(x => x.Score.PlayerId)
+                        .Select(playerGroup => playerGroup.OrderByDescending(x => x.Score.WPM).First())
                         .OrderByDescending(x => x.Score.WPM)
                         .ThenByDescending(x => x.Score.Accuracy)
                         .Take(topCount)
@@ -252,6 +252,8 @@ namespace GamingPlatform.Services
                 .Where(x => x.TopScores.Any())
                 .Select(x => x.TopScores.GroupBy(s => x.GameType).First())
                 .ToList();
+
+            return scoresWithGameType;
         }
 
 

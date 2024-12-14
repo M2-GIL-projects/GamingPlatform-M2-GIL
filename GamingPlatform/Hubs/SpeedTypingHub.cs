@@ -31,29 +31,31 @@ namespace GamingPlatform.Hubs
             _context = context;
         }
 
-        public async Task StartGame(string difficulty)
+        public async Task StartGame(string difficulty, string language)
         {
-            if (Enum.TryParse<Difficulty>(difficulty, true, out Difficulty parsedDifficulty))
+            if (Enum.TryParse<Difficulty>(difficulty, true, out Difficulty parsedDifficulty) &&
+                Enum.TryParse<Language>(language, true, out Language parsedLanguage))
             {
                 try
                 {
-                    _logger.LogInformation("Starting game with difficulty: {Difficulty}", parsedDifficulty);
-                    _game.InitializeBoard(parsedDifficulty);
+                    _logger.LogInformation("Starting game with difficulty: {Difficulty} and language: {Language}", parsedDifficulty, parsedLanguage);
+                    _game.InitializeBoard(parsedDifficulty, parsedLanguage);
                     _logger.LogInformation("Game initialized with text: {TextToType} and time limit: {TimeLimit}", _game.TextToType, _game.TimeLimit);
                     await Clients.All.SendAsync("GameStarted", _game.TextToType, _game.TimeLimit);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unhandled exception in StartGame for difficulty: {Difficulty}", parsedDifficulty);
+                    _logger.LogError(ex, "Unhandled exception in StartGame for difficulty: {Difficulty} and language: {Language}", parsedDifficulty, parsedLanguage);
                     throw;
                 }
             }
             else
             {
-                _logger.LogWarning("Invalid difficulty received: {Difficulty}", difficulty);
-                throw new ArgumentException("Invalid difficulty", nameof(difficulty));
+                _logger.LogWarning("Invalid difficulty or language received: {Difficulty}, {Language}", difficulty, language);
+                throw new ArgumentException("Invalid difficulty or language");
             }
         }
+
 
         public async Task JoinLobby(string lobbyId, string pseudo)
         {
@@ -133,6 +135,35 @@ namespace GamingPlatform.Hubs
             {
                 _logger.LogWarning("Invalid difficulty received: {Difficulty}", difficulty);
                 throw new ArgumentException("Invalid difficulty", nameof(difficulty));
+            }
+        }
+
+
+        public async Task ChangeLanguage(string language)
+        {
+            if (Enum.TryParse<Language>(language, true, out Language parsedLanguage))
+            {
+                try
+                {
+                    var lobbyId = Context.Items["LobbyId"]?.ToString();
+                    if (string.IsNullOrWhiteSpace(lobbyId))
+                        throw new InvalidOperationException("Lobby ID not found in connection context.");
+
+                    _logger.LogInformation("Changing language to {Language} for lobby {LobbyId}", parsedLanguage, lobbyId);
+
+                    // Diffuse la difficulté à tous les membres du lobby
+                    await Clients.Group(lobbyId).SendAsync("LanguageChanged", language);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error changing language to {Language}", language);
+                    throw;
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Invalid language received: {Language}", language);
+                throw new ArgumentException("Invalid language", nameof(language));
             }
         }
 

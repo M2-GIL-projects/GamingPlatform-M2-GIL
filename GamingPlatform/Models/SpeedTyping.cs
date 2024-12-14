@@ -17,11 +17,10 @@ namespace GamingPlatform.Models
         public bool IsGameStarted { get; private set; }
         public int TimeLimit { get; private set; }
         public Difficulty CurrentDifficulty { get; private set; }
+        public Language CurrentLanguage { get; private set; }
+
 
         private ConcurrentDictionary<string, string> _connectionToPseudo;
-
-        //private readonly Dictionary<string, string> _connectionToPseudo = new Dictionary<string, string>();
-
 
         private readonly IHubContext<SpeedTypingHub> _hubContext;
         private Dictionary<string, PlayerStats> _playerStats = new Dictionary<string, PlayerStats>();
@@ -37,15 +36,17 @@ namespace GamingPlatform.Models
             _connectionToPseudo = connectionToPseudo ?? throw new ArgumentNullException(nameof(connectionToPseudo));
         }
 
-        public void InitializeBoard(Difficulty difficulty)
+        public void InitializeBoard(Difficulty difficulty, Language language)
         {
             Console.WriteLine($"Début de InitializeBoard avec difficulté {difficulty}");
             try
             {
                 Console.WriteLine($"Initializing board for difficulty: {difficulty}");
+                Console.WriteLine($"Initializing board for language: {language}");
                 CurrentDifficulty = difficulty;
+                CurrentLanguage = language;
 
-                TextToType = GenerateRandomText(difficulty);
+                TextToType = GenerateRandomText(difficulty, language);
                 if (string.IsNullOrEmpty(TextToType))
                 {
                     throw new Exception("Failed to generate text for difficulty.");
@@ -89,6 +90,11 @@ namespace GamingPlatform.Models
 
         public async Task CheckProgress(string playerId, string typedText)
         {
+            if (!IsGameStarted)
+            {
+                return; // Ne pas traiter si la partie est terminée
+            }
+
             if (!_playerStats.ContainsKey(playerId))
             {
                 _playerStats[playerId] = new PlayerStats(StartTime);
@@ -112,6 +118,7 @@ namespace GamingPlatform.Models
 
         private async Task EndGame()
         {
+            if (!IsGameStarted) return; // Empêcher l'appel multiple de EndGame
             IsGameStarted = false;
 
             var leaderboard = _playerStats
@@ -129,21 +136,9 @@ namespace GamingPlatform.Models
         }
 
 
-        private string GenerateRandomText(Difficulty difficulty)
+        private string GenerateRandomText(Difficulty difficulty, Language language)
         {
-            string[] sentences = new string[]
-            {
-                "The quick brown fox jumps over the lazy dog.",
-                "A journey of a thousand miles begins with a single step.",
-                "To be or not to be, that is the question.",
-                "All that glitters is not gold.",
-                "Where there's a will, there's a way.",
-                "Actions speak louder than words.",
-                "Knowledge is power, guard it well.",
-                "Practice makes perfect.",
-                "Two wrongs don't make a right.",
-                "When in Rome, do as the Romans do."
-            };
+            string[] sentences = GetSentences(language);
 
             Random random = new Random();
             int sentenceCount = difficulty switch
@@ -162,6 +157,40 @@ namespace GamingPlatform.Models
             }
 
             return string.Join(" ", selectedSentences);
+        }
+
+        private string[] GetSentences(Language language)
+        {
+            return language switch
+            {
+                Language.English => new string[]
+                {
+                "The quick brown fox jumps over the lazy dog.",
+                "A journey of a thousand miles begins with a single step.",
+                "To be or not to be, that is the question.",
+                "All that glitters is not gold.",
+                "Where there's a will, there's a way.",
+                "Actions speak louder than words.",
+                "Knowledge is power, guard it well.",
+                "Practice makes perfect.",
+                "Two wrongs don't make a right.",
+                "When in Rome, do as the Romans do."
+                },
+                Language.French => new string[]
+                {
+                "Le renard brun rapide saute par-dessus le chien paresseux.",
+                "Un voyage de mille lieues commence toujours par un premier pas.",
+                "Être ou ne pas être, telle est la question.",
+                "Tout ce qui brille n'est pas or.",
+                "Là où il y a une volonté, il y a un chemin.",
+                "Les actions parlent plus fort que les mots.",
+                "Le savoir est une force, protège-le bien.",
+                "C'est en forgeant qu'on devient forgeron.",
+                "Deux torts ne font pas un droit.",
+                "À Rome, fais comme les Romains."
+                },
+                _ => throw new ArgumentOutOfRangeException(nameof(language)),
+            };
         }
 
         private int GetTimeLimit(Difficulty difficulty)
