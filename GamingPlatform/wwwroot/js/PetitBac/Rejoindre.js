@@ -108,8 +108,9 @@ document.getElementById("submitCorrection").addEventListener("click", () => {
     const total = checkboxes.length;
     const scorePercentage = Math.round((correctCount / total) * 100);
 
-    // Afficher le score dans une alerte ou une notification
+    // Afficher le score dans une alerte ou une notificationy
     alert(`Score calculé : ${scorePercentage}%`);
+
 
     // Mettre à jour le score dans la table des joueurs
     const playerList = document.getElementById("player-list");
@@ -128,7 +129,7 @@ document.getElementById("submitCorrection").addEventListener("click", () => {
     // Soumettre le score via fetch
     const requestData = {
         PlayerPseudo: playerPseudo,
-        GameId: parseInt(gameId, 10),
+          GameId: parseInt(gameId, 10),
         Score: scorePercentage
     };
 

@@ -95,13 +95,7 @@
                     } else if (@Model.Game.Name == "PetitBac"){
                           <a href="@Url.Action("Configure", "PetitBac", new { lobbyId = Model.Id })" class="btn btn-primary">Configurer le jeu</a>
                     }
-                    else if (@Model.Game.Code == "LAB")
-                    {
-                        <a href="/Game/Labyrinth/Play/@Model.Id" class="btn btn-success">
-                            Rejoindre le plateau de jeu
-                        </a>
-                    }
-
+                    
                     else
                     {
                         <a href="/Game/Play/@Model.Game.Code?lobbyId=@Model.Id" class="btn btn-success">
@@ -126,9 +120,9 @@
             fetch(`/Lobby/Start/${lobbyId}`, { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
-                    alert(data.Message || 'Jeu démarré');
+                    console.log('Réponse reçue:', data); // Ajoutez cette ligne
+                    alert(data.Message || 'Aucun message reçu');
                     if (data.RedirectUrl) {
-                        console.log(data.RedirectUrl);
                         window.location.href = data.RedirectUrl;
                     }
                 })

@@ -6,18 +6,25 @@
 
 <div class="container py-5">
     <div class="text-center mb-5">
-        <h1 class="display-4 fw-bold text-primary">Configuration de la Partie</h1>
-        <p class="lead text-muted">Personnalisez votre jeu Petit Bac avec vos paramètres préférés.</p>
+        <h1 class="display-4 fw-bold text-primary">
+            <span role="img" aria-label="Game Controller">🎮</span> 
+            Configuration de la Partie 
+            <span role="img" aria-label="Sparkles">✨</span>
+        </h1>
+        <p class="lead text-muted">
+            <span role="img" aria-label="Custom Settings">⚙️</span> 
+            Personnalisez votre jeu Petit Bac avec vos paramètres préférés.
+            <span role="img" aria-label="Smiley Face">😊</span>
+        </p>
     </div>
-
-    <form method="post" asp-action="ConfigureGame" id="configureGameForm" class="p-4 shadow-lg rounded bg-light">
+</div>
+   <form method="post" asp-action="ConfigureGame" id="configureGameForm" class="p-4 shadow-lg rounded bg-light">
         <input type="hidden" name="LobbyId" value="@Model.LobbyId" />
 
         <!-- Pseudo du Créateur -->
         <div class="mb-4">
             <label for="CreatorPseudo" class="form-label">Pseudo du Créateur :</label>
             <input type="text" class="form-control bg-light" id="CreatorPseudo" name="CreatorPseudo" value="@Model.CreatorPseudo" readonly />
-            <small class="text-muted">Le pseudo est récupéré automatiquement depuis votre session.</small>
         </div>
 
         <!-- Nombre de Joueurs -->

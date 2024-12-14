@@ -191,26 +191,29 @@ public async Task<IActionResult> ConfigureGame(PetitBacGame model, string[] Sele
  [HttpPost]
 public async Task<IActionResult> RegisterPlayer(int gameId, string pseudo)
 {
+    
+    // Vérifier si le pseudo est vide
     if (string.IsNullOrWhiteSpace(pseudo))
     {
-        TempData["Error"] = "Le pseudo ne peut pas être vide.";
-        return RedirectToAction("Recapitulatif", new { gameId });
+        return Json(new { success = false, message = "Le pseudo ne peut pas être vide." });
     }
 
+    // Récupérer le jeu et vérifier s'il existe
     var game = _context.PetitBacGames
         .Include(g => g.Players)
         .FirstOrDefault(g => g.Id == gameId);
 
     if (game == null)
     {
-        return NotFound("Jeu introuvable.");
+        return Json(new { success = false, message = "Jeu introuvable." });
     }
 
-    var existingPlayer = game.Players.FirstOrDefault(p => p.Pseudo == pseudo);
+    // Vérifier si un joueur avec le même pseudo existe déjà dans la partie
+    var existingPlayer = _context.PetitBacPlayer
+        .FirstOrDefault(p => p.Pseudo == pseudo && p.PetitBacGameId == gameId);
     if (existingPlayer != null)
     {
-        TempData["Error"] = "Un joueur avec ce pseudo est déjà inscrit dans cette partie.";
-        return RedirectToAction("Recapitulatif", new { gameId });
+        return Json(new { success = false, message = "Un joueur avec ce pseudo est déjà inscrit dans cette partie." });
     }
 
     var player = new PetitBacPlayer
@@ -419,5 +422,7 @@ public IActionResult GetPlayerAnswersByPseudo(string playerPseudo)
         return StatusCode(500, new { message = "Une erreur est survenue lors de la récupération des réponses." });
     }
 }
+
+
 }
 }

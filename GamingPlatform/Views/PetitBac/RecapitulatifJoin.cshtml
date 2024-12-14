@@ -4,6 +4,7 @@
     ViewBag.HideFooter = true;
 }
 @model GamingPlatform.Models.PetitBacGame
+<input type="hidden" id="creatorPseudo" value="@Model.CreatorPseudo" />
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -54,12 +55,11 @@
                                 <input type="hidden" name="gameId" value="@Model.Id" />
                                 <div id="alertMessage" class="alert alert-danger" style="display: none;"></div>
                                 <div class="mb-4">
-                                    <label for="Pseudo" class="form-label">Entrez votre Pseudo</label>
-                                    <input type="text" class="form-control" id="Pseudo" name="pseudo" required />
-                                    <small class="text-danger d-none" id="pseudoError" style="font-size: 14px; font-weight: bold;">
-                                        Le pseudo doit contenir au moins 5 caractères et commencer par une lettre.
-                                    </small>
+    <label for="Pseudo" class="form-label">Entrez votre Pseudo</label>
+    <input type="text" class="form-control" id="Pseudo" name="pseudo" required />
+    <small class="text-danger d-none" id="pseudoError" style="font-size: 14px; font-weight: bold;"></small>
                                 </div>
+
                             </form>
                         </tbody>
                           
