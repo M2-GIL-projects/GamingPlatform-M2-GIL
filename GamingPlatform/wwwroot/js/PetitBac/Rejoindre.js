@@ -128,7 +128,7 @@ document.getElementById("submitCorrection").addEventListener("click", () => {
     // Soumettre le score via fetch
     const requestData = {
         PlayerPseudo: playerPseudo,
-        GameId: gameId,
+        GameId: parseInt(gameId, 10),
         Score: scorePercentage
     };
 
