@@ -9,9 +9,9 @@
     </div>
 
     <!-- Spinner de chargement -->
-    <div id="loadingSpinner" style="display: none;">
+    <div id="loadingSpinner" class="d-flex flex-column align-items-center justify-content-center vh-100">
         <div class="spinner"></div>
-        <p class="mt-3 text-primary">Création en cours...</p>
+        <p id="spinnerMessage" class="mt-3 text-primary">Initialisation...</p>
     </div>
 
     <script src="~/js/signalr/dist/browser/signalr.js"></script>
@@ -35,38 +35,41 @@
         }
 
         // Fonction pour générer et envoyer le labyrinthe
-        function generateAndSendLabyrinth() {
+function generateAndSendLabyrinth() {
+    const nRows = 25;
+    const nCols = 25;
 
-            var nRows = 25;
-            var nCols = 25;
+    try {
+        // Modifier le message du spinner
+        toggleSpinner(true, "Création du labyrinthe en cours...");
 
-            try {
-                // Générer le labyrinthe
-                var labyrinth = labyrinthgenerator(nRows, nCols);
+        // Générer le labyrinthe
+        const labyrinth = labyrinthgenerator(nRows, nCols);
 
-                // Convertir le labyrinthe en JSON
-                var labyrinthJson = JSON.stringify(labyrinth);
+        // Convertir le labyrinthe en JSON
+        const labyrinthJson = JSON.stringify(labyrinth);
 
-                // Envoyer le labyrinthe au serveur
-                connection.invoke("SaveLabyrinth", lobbyId, player1, player2, labyrinthJson)
-                    .then(() => {
+        // Envoyer le labyrinthe au serveur
+        connection.invoke("SaveLabyrinth", lobbyId, player1, player2, labyrinthJson)
+            .then(() => {
+                toggleSpinner(true, "Enregistrement du labyrinthe...");
 
-                        toggleSpinner(true); // Afficher le spinner après avoir appuyé sur le bouton
-                        // Réception du message "LabyrinthSaved" depuis le serveur
-                        connection.on("LabyrinthSaved", function (message) {
-                            toggleSpinner(false); // Masquer le spinner une fois le labyrinthe créé
-                            alert(message);
-                            window.location.href = `/Game/Labyrinth/Play/${lobbyId}`;
-                        });
-                    })
-                    .catch(function (err) {
-                        toggleSpinner(false); // Masquer le spinner en cas d'erreur
-                        console.error(err.toString());
-                    });
-            } catch (error) {
-                toggleSpinner(false); // Masquer le spinner si une erreur se produit
-                console.error("Erreur lors de la génération du labyrinthe :", error);
-            }
+                // Réception du message "LabyrinthSaved" depuis le serveur
+                connection.on("LabyrinthSaved", function (message) {
+                    toggleSpinner(false); // Masquer le spinner une fois le labyrinthe créé
+                    alert(message);
+                    window.location.href = `/Game/LAB/Play/${lobbyId}`;
+                });
+            })
+            .catch(function (err) {
+                toggleSpinner(false); // Masquer le spinner en cas d'erreur
+                console.error(err.toString());
+            });
+    } catch (error) {
+        toggleSpinner(false); // Masquer le spinner si une erreur se produit
+        console.error("Erreur lors de la génération du labyrinthe :", error);
+    }
+}
         }
 
         // Ajouter un écouteur d'événements au bouton

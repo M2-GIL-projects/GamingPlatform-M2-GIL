@@ -3,12 +3,10 @@ using GamingPlatform.Models;
 using GamingPlatform.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.JSInterop;
-using Newtonsoft.Json;
 
 namespace GamingPlatform.Controllers
 {
-    [Route("Game/Labyrinth")]
+    [Route("Game/LAB")]
     public class LabyrinthController : Controller
     {
         private readonly LabyrinthGenerator _labyrinthGenerator;
@@ -32,7 +30,22 @@ namespace GamingPlatform.Controllers
             {
                 return NotFound("Aucun labyrinthe n'a été généré pour ce lobby.");
             }
+            var lobby = _lobbyService.GetLobbyWithGameAndPlayers(lobbyId);
+            var players = lobby.LobbyPlayers.ToList();
+            if (players.Count < 2)
+            {
+                return NotFound("Une erreur est survenue: on a pas deux joueurs dans le jeu");
+            }
+
+            // Extraire les pseudos des joueurs
+            var player1 = players[0].Player.Pseudo;
+            var player2 = players[1].Player.Pseudo;
+            var player = await GetCurrentPlayer();
+
             ViewBag.lobbyId = lobbyId;
+            ViewBag.player1 = player1;
+            ViewBag.player2 = player2;
+            ViewBag.currentplayer = player.Pseudo;
             return View();
         }
 
