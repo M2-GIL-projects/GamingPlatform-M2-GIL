@@ -1,7 +1,11 @@
-﻿<meta charset="utf-8">
-<title>Création de Labyrinthe</title>
-<link rel="stylesheet" href="~/css/labyrinth/labyrinth.css" asp-append-version="true" />
-
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Création de Labyrinthe</title>
+    <link rel="stylesheet" href="~/css/labyrinth/labyrinth.css" asp-append-version="true" />
+</head>
 <body class="bg-light">
     <!-- Conteneur principal -->
     <div class="container text-center d-flex vh-100 align-items-center justify-content-center">
@@ -9,8 +13,8 @@
     </div>
 
     <!-- Spinner de chargement -->
-    <div id="loadingSpinner" class="d-flex flex-column align-items-center justify-content-center vh-100">
-        <div class="spinner"></div>
+    <div id="loadingSpinner" class="d-flex flex-column align-items-center justify-content-center vh-100" style="display: none;">
+        <div class="spinner-border text-primary" role="status"></div>
         <p id="spinnerMessage" class="mt-3 text-primary">Initialisation...</p>
     </div>
 
@@ -18,61 +22,54 @@
     <script src="~/js/labyrinth/labyrinthgenerator.js"></script>
     <script>
         // Établir la connexion SignalR
-        var connection = new signalR.HubConnectionBuilder().withUrl("/labyrinthHub").build();
+        const connection = new signalR.HubConnectionBuilder().withUrl("/labyrinthHub").build();
 
         // Démarrer la connexion SignalR
-        connection.start().catch(function (err) {
-            return console.error(err.toString());
-        });
+        connection.start().catch(err => console.error("Erreur lors de la connexion SignalR :", err.toString()));
 
+        // Récupérer les données du lobby et des joueurs depuis ViewBag
         const lobbyId = "@ViewBag.lobbyId";
         const player1 = "@ViewBag.player1";
         const player2 = "@ViewBag.player2";
 
-        // Fonction pour afficher/masquer le spinner
-        function toggleSpinner(show) {
-            document.getElementById("loadingSpinner").style.display = show ? "flex" : "none";
+        // Fonction pour afficher/masquer le spinner avec un message optionnel
+        function toggleSpinner(show, message = "Chargement...") {
+            const spinner = document.getElementById("loadingSpinner");
+            const spinnerMessage = document.getElementById("spinnerMessage");
+
+            spinner.style.display = show ? "flex" : "none";
+            spinnerMessage.textContent = message;
         }
 
         // Fonction pour générer et envoyer le labyrinthe
-function generateAndSendLabyrinth() {
-    const nRows = 25;
-    const nCols = 25;
+        async function generateAndSendLabyrinth() {
+            const nRows = 25;
+            const nCols = 25;
 
-    try {
-        // Modifier le message du spinner
-        toggleSpinner(true, "Création du labyrinthe en cours...");
+            try {
+                // Afficher le spinner pendant la création
+                toggleSpinner(true, "Création du labyrinthe en cours...");
 
-        // Générer le labyrinthe
-        const labyrinth = labyrinthgenerator(nRows, nCols);
+                // Générer le labyrinthe
+                const labyrinth = labyrinthgenerator(nRows, nCols);
 
-        // Convertir le labyrinthe en JSON
-        const labyrinthJson = JSON.stringify(labyrinth);
+                // Convertir le labyrinthe en JSON
+                const labyrinthJson = JSON.stringify(labyrinth);
 
-        // Envoyer le labyrinthe au serveur
-        connection.invoke("SaveLabyrinth", lobbyId, player1, player2, labyrinthJson)
-            .then(() => {
-                toggleSpinner(true, "Enregistrement du labyrinthe...");
-
-                // Réception du message "LabyrinthSaved" depuis le serveur
-                connection.on("LabyrinthSaved", function (message) {
-                    toggleSpinner(false); // Masquer le spinner une fois le labyrinthe créé
-                    alert(message);
-                    window.location.href = `/Game/LAB/Play/${lobbyId}`;
-                });
-            })
-            .catch(function (err) {
-                toggleSpinner(false); // Masquer le spinner en cas d'erreur
-                console.error(err.toString());
-            });
-    } catch (error) {
-        toggleSpinner(false); // Masquer le spinner si une erreur se produit
-        console.error("Erreur lors de la génération du labyrinthe :", error);
-    }
-}
+                // Envoyer le labyrinthe au serveur
+                await connection.invoke("SaveLabyrinth", lobbyId, player1, player2, labyrinthJson);
+                alert(message);
+                    // Rediriger vers la page de jeu
+                window.location.href = `/Game/LAB/Play/${lobbyId}`;
+            } catch (err) {
+                // Gérer les erreurs
+                toggleSpinner(false);
+                console.error("Erreur lors de la génération ou de l'enregistrement du labyrinthe :", err);
+            }
         }
 
         // Ajouter un écouteur d'événements au bouton
         document.getElementById("generateLabyrinthButton").addEventListener("click", generateAndSendLabyrinth);
     </script>
 </body>
+</html>
