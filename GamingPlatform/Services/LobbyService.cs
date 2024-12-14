@@ -193,6 +193,21 @@ namespace GamingPlatform.Services
                                 RedirectUrl = $"/Game/Morpion/Play/{lobbyId}"
                             });
                         }
+                    case "LAB":
+                        {
+                            var players = lobby.LobbyPlayers.ToList();
+                            if (players.Count < 2)
+                            {
+                                return new ObjectResult(new { Message = $"Une erreur est survenue: on a pas deux joueurs dans le jeu" });
+                            }
+                            UpdateLobby(lobby);
+
+                            return new OkObjectResult(new
+                            {
+                                RedirectUrl = $"/Game/Labyrinth/Play/{lobbyId}",
+                                Message = "Partie de Course de labyrinthe démarrée"
+                            });
+                        }
 
                     case "PTB":
                         {
@@ -251,3 +266,4 @@ public class PlayerAlreadyInLobbyException : Exception
 
     public PlayerAlreadyInLobbyException(string message, Exception inner) : base(message, inner) { }
 }
+
