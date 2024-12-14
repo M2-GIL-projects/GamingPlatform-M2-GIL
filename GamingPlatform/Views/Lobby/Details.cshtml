@@ -87,15 +87,15 @@
                 }
                 else if (Model.Status == GamingPlatform.Models.LobbyStatus.InProgress)
                 {
-                    if (@Model.Game.Name == "SpeedTyping" || @Model.Game.Name == "Morpion")
+                    if (@Model.Game.Code == "SPT" || @Model.Game.Code == "MOR" || @Model.Game.Code == "LAB")
                     {
-                        <a href="/Game/@Model.Game.Name/Play/@Model.Id" class="btn btn-success">
+                        <a href="/Game/@Model.Game.Code/Play/@Model.Id" class="btn btn-success">
                             Rejoindre le plateau de jeu
                         </a>
                     } else if (@Model.Game.Name == "PetitBac"){
                           <a href="@Url.Action("Configure", "PetitBac", new { lobbyId = Model.Id })" class="btn btn-primary">Configurer le jeu</a>
                     }
-                    
+
                     else
                     {
                         <a href="/Game/Play/@Model.Game.Code?lobbyId=@Model.Id" class="btn btn-success">
@@ -117,14 +117,11 @@
 @section Scripts {
     <script>
         function startGame(lobbyId) {
+            console.log(`/Game/@Model.Game.Code/Play/${lobbyId}`);
             fetch(`/Lobby/Start/${lobbyId}`, { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Réponse reçue:', data); // Ajoutez cette ligne
-                    alert(data.Message || 'Aucun message reçu');
-                    if (data.RedirectUrl) {
-                        window.location.href = data.RedirectUrl;
-                    }
+                    window.location.href = `/Game/@Model.Game.Code/Play/${lobbyId}`;
                 })
                 .catch(err => {
                     console.error("Une erreur s'est produite : ", err);
