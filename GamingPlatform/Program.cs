@@ -92,7 +92,6 @@ app.MapControllerRoute(
     defaults: new { controller = "Game", action = "LobbiesByGameCode" });
 
 
-app.MapHub<ChatHub>("/chatHub");
 app.MapHub<LabyrinthHub>("/labyrinthHub");
 app.MapHub<MorpionHub>("/MorpionHub");
 

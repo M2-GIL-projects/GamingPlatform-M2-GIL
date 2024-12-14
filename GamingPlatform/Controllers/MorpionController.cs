@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace GamingPlatform.Controllers
 {
-    [Route("Game/Morpion")]
+    [Route("Game/MOR")]
     public class MorpionController : Controller
     {
         private readonly LobbyService _lobbyService;

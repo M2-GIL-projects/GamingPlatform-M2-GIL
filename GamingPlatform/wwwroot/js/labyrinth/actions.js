@@ -53,7 +53,7 @@ canvas.height = nRows * CELL_SIZE;
 
 // Set up paragraph to show game messages
 var gameMessages = document.querySelector("#gameMessages");
-gameMessages.innerHTML = "Utilise les flèches pour le Joueur 1 (Bleu) et WASD pour le Joueur 2 (Rouge).<br><strong>Course de labyrinthe</strong>: Atteignez la sortie vert foncée.";
+gameMessages.innerHTML = "Utilise les flèches pour jouer.<br><strong>Course de labyrinthe</strong>: Atteignez la sortie vert foncée.";
 
 // Set up timer
 var timeLeft = 90;
@@ -62,40 +62,6 @@ var gameRunning = false;
 // Draw starting situation
 render();
 
-// Handles keyboard input
-function keyboardHandler(event) {
-    if (!gameReady) return; 
-    if (!gameRunning && (event.keyCode >= 37 && event.keyCode <= 40 || event.keyCode >= 65 && event.keyCode <= 87)) {
-        gameRunning = true;
-    }
-
-    // Handle player movement and send to server
-    if (event.keyCode >= 37 && event.keyCode <= 40) { // Arrow keys for Player 1
-        handlePlayerMovement(event.keyCode, player1Cell, UP, DOWN, LEFT, RIGHT, 1, (nextCell) => {
-            player1Cell = nextCell;
-            connection.invoke("SendPlayerMovement", 1, nextCell);
-        });
-    }
-
-    if (event.keyCode >= 65 && event.keyCode <= 87) { // WASD keys for Player 2
-        handlePlayerMovement(event.keyCode, player2Cell, W, S, A, D, 2, (nextCell) => {
-            player2Cell = nextCell;
-            connection.invoke("SendPlayerMovement", 2, nextCell);
-        });
-    }
-
-    // Check for win condition
-    if (player1Cell == destinationCell || player2Cell == destinationCell) {
-        endGame();
-        if (player1Cell == destinationCell) {
-            connection.invoke("SendGameEnd", "Le premier joueur a gagné la course !");
-        } else {
-            connection.invoke("SendGameEnd", "Le deuxième joueur a gagné la course !");
-        }
-    }
-
-    render();
-}
 
 // Helper function to handle movement for each player
 function handlePlayerMovement(keyCode, playerCell, upKey, downKey, leftKey, rightKey, playerMark, updatePlayerCell) {

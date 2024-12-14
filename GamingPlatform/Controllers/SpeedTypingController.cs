@@ -8,7 +8,7 @@ using GamingPlatform.Data;
 
 namespace GamingPlatform.Controllers
 {
-    [Route("Game/SpeedTyping")]
+    [Route("Game/SPT")]
     public class SpeedTypingController : Controller
     {
         private readonly LobbyService _lobbyService;
