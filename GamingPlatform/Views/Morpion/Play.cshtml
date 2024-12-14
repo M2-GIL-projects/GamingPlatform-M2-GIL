@@ -128,8 +128,15 @@
 
 
         connection.on("InvalidMove", (message) => {
-            document.getElementById("game-status").innerHTML = `<div class="alert alert-danger text-center">${message}</div>`;
+            Swal.fire({
+                text: message,
+                icon: 'error',
+                confirmButtonText: 'OK',
+                timer: 3000,
+                timerProgressBar: true
+            });
         });
+
 
         function makeMove(row, col) {
             connection.invoke("MakeMove", lobbyId, row, col).catch(err => console.error(err));
