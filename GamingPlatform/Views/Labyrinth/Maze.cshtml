@@ -34,7 +34,7 @@
         var gameReady = false;
         const lobbyId = '@ViewBag.lobbyId';
         // Appel pour récupérer le labyrinthe
-        fetch(`/game/labyrinth/getlabyrinthlobby/${lobbyId}`) // Vérifiez le bon chemin de l'endpoint
+        fetch(`/game/lab/getlabyrinthlobby/${lobbyId}`) // Vérifiez le bon chemin de l'endpoint
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
