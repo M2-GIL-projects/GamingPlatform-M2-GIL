@@ -22,81 +22,107 @@ namespace GamingPlatform.Controllers
             _context = context;
             _hubContext = hubContext;
         }
+    [HttpGet]
+    public IActionResult Configure(Guid lobbyId)
+{
+    // Récupérer le lobby
+    var lobby = _context.Lobby.Include(l => l.Game).FirstOrDefault(l => l.Id == lobbyId);
+    if (lobby == null)
+    {
+        Console.WriteLine("Erreur : Lobby introuvable.");
+        return NotFound("Lobby introuvable.");
+    }
 
-        [HttpGet]
-        public IActionResult Configure(Guid lobbyId)
+    // Récupérer le pseudo du joueur connecté depuis la session
+    var creatorPseudo = HttpContext.Session.GetString("PlayerPseudo");
+    if (string.IsNullOrEmpty(creatorPseudo))
+    {
+        Console.WriteLine("Erreur : Aucun pseudo trouvé dans la session.");
+        return RedirectToAction("Index", "Home"); // Rediriger vers la page d'accueil ou de connexion si la session est vide
+    }
+
+    // Vérifier que le joueur est bien dans le lobby (optionnel)
+    var playerInLobby = _context.LobbyPlayer.Any(lp => lp.LobbyId == lobbyId && lp.Player.Pseudo == creatorPseudo);
+    if (!playerInLobby)
+    {
+        Console.WriteLine("Erreur : Le joueur n'appartient pas à ce lobby.");
+        return Unauthorized("Vous n'avez pas accès à ce lobby.");
+    }
+
+    // Créer le modèle de configuration du jeu
+    var model = new PetitBacGame
+    {
+        LobbyId = lobbyId,
+        Letters = new List<char>(), // Laisser vide pour permettre la personnalisation
+        PlayerCount = 2, // Définir un nombre par défaut (modifiable par le créateur)
+        CreatorPseudo = creatorPseudo,
+        Categories = _context.PetitBacCategories.ToList()
+    };
+
+    // Générer un lien pour inviter un joueur
+    string linkPlayer2 = $"{Request.Scheme}://{Request.Host}/PetitBac/Join?code={lobby.Game.Code}&playerId=2";
+    ViewBag.LinkPlayer2 = linkPlayer2;
+
+    Console.WriteLine($"Configuration initialisée pour le lobby : {lobbyId}, Créateur : {creatorPseudo}");
+    return View("Configuration", model);
+}
+
+[HttpPost]
+public async Task<IActionResult> ConfigureGame(PetitBacGame model, string[] SelectedCategories, string[] SelectedLetters)
+{
+    try
+    {
+        // Récupérer le lobby
+        var lobby = _context.Lobby.Include(l => l.Game).FirstOrDefault(l => l.Id == model.LobbyId);
+        if (lobby == null)
         {
-            var lobby = _context.Lobby.FirstOrDefault(l => l.Id == lobbyId);
-            if (lobby == null)
-            {
-                Console.WriteLine("Erreur : Lobby introuvable.");
-                return NotFound("Lobby introuvable.");
-            }
+            Console.WriteLine("Erreur : Lobby introuvable lors de la configuration.");
+            return NotFound("Lobby introuvable.");
+        }
 
-            var model = new PetitBacGame
-            {
-                LobbyId = lobbyId,
-                Letters = new List<char> { 'A' },
-                PlayerCount = 2,
-                CreatorPseudo = "",
-                Categories = _context.PetitBacCategories.ToList(),
-            };
+        model.Lobby = lobby;
 
-            string linkPlayer2 = $"{Request.Scheme}://{Request.Host}/PetitBac/Join?code={lobby.Code}&playerId=2";
-            ViewBag.LinkPlayer2 = linkPlayer2;
-
-            Console.WriteLine($"Configuration initialisée pour le lobby : {lobbyId}");
+        // Validation des lettres sélectionnées
+        if (SelectedLetters == null || SelectedLetters.Length == 0)
+        {
+            ModelState.AddModelError("Letters", "Vous devez sélectionner au moins une lettre.");
             return View("Configuration", model);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ConfigureGame(PetitBacGame model, string[] SelectedCategories, string[] SelectedLetters)
+        model.Letters = SelectedLetters.Select(l => l[0]).ToList();
+
+        // Validation des catégories sélectionnées
+        if (SelectedCategories == null || SelectedCategories.Length == 0)
         {
-            try
-            {
-                var lobby = _context.Lobby.FirstOrDefault(l => l.Id == model.LobbyId);
-                if (lobby == null)
-                {
-                    Console.WriteLine("Erreur : Lobby introuvable lors de la configuration.");
-                    return NotFound("Lobby introuvable.");
-                }
-
-                model.Lobby = lobby;
-
-                if (SelectedLetters == null || SelectedLetters.Length == 0)
-                {
-                    ModelState.AddModelError("Letters", "Vous devez sélectionner au moins une lettre.");
-                    return View("Configuration", model);
-                }
-
-                model.Letters.AddRange(SelectedLetters.Select(l => l[0]));
-
-                if (SelectedCategories == null || SelectedCategories.Length == 0)
-                {
-                    ModelState.AddModelError("SelectedCategories", "Vous devez sélectionner au moins une catégorie.");
-                    return View("Configuration", model);
-                }
-
-                foreach (var category in SelectedCategories)
-                {
-                    model.Categories.Add(new PetitBacCategory { Name = category });
-                }
-
-                _context.PetitBacGames.Add(model);
-                _context.SaveChanges();
-
-                Console.WriteLine($"Partie configurée avec succès : {model.Id}");
-                await _hubContext.Clients.Group(model.Id.ToString())
-                    .SendAsync("GameConfiguredNotification", "La partie a été configurée.");
-
-                return RedirectToAction("Recapitulatif", new { gameId = model.Id });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Erreur lors de la configuration de la partie : {ex.Message}");
-                return BadRequest(new { message = "Erreur lors de la configuration du jeu.", error = ex.Message });
-            }
+            ModelState.AddModelError("SelectedCategories", "Vous devez sélectionner au moins une catégorie.");
+            return View("Configuration", model);
         }
+
+        foreach (var category in SelectedCategories)
+        {
+            model.Categories.Add(new PetitBacCategory { Name = category });
+        }
+
+        // Ajouter le jeu à la base de données
+        _context.PetitBacGames.Add(model);
+        _context.SaveChanges();
+
+        Console.WriteLine($"Partie configurée avec succès : {model.Id}");
+
+        // Notification via SignalR
+        await _hubContext.Clients.Group(model.LobbyId.ToString())
+            .SendAsync("GameConfiguredNotification", $"La partie dans le lobby {lobby.Name} a été configurée par {model.CreatorPseudo}.");
+
+        return RedirectToAction("Recapitulatif", new { gameId = model.Id });
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Erreur lors de la configuration de la partie : {ex.Message}");
+        return BadRequest(new { message = "Erreur lors de la configuration du jeu.", error = ex.Message });
+    }
+}
+
+
 
         public IActionResult Recapitulatif(int gameId)
 {
@@ -165,26 +191,29 @@ namespace GamingPlatform.Controllers
  [HttpPost]
 public async Task<IActionResult> RegisterPlayer(int gameId, string pseudo)
 {
+    
+    // Vérifier si le pseudo est vide
     if (string.IsNullOrWhiteSpace(pseudo))
     {
-        TempData["Error"] = "Le pseudo ne peut pas être vide.";
-        return RedirectToAction("Recapitulatif", new { gameId });
+        return Json(new { success = false, message = "Le pseudo ne peut pas être vide." });
     }
 
+    // Récupérer le jeu et vérifier s'il existe
     var game = _context.PetitBacGames
         .Include(g => g.Players)
         .FirstOrDefault(g => g.Id == gameId);
 
     if (game == null)
     {
-        return NotFound("Jeu introuvable.");
+        return Json(new { success = false, message = "Jeu introuvable." });
     }
 
-    var existingPlayer = game.Players.FirstOrDefault(p => p.Pseudo == pseudo);
+    // Vérifier si un joueur avec le même pseudo existe déjà dans la partie
+    var existingPlayer = _context.PetitBacPlayer
+        .FirstOrDefault(p => p.Pseudo == pseudo && p.PetitBacGameId == gameId);
     if (existingPlayer != null)
     {
-        TempData["Error"] = "Un joueur avec ce pseudo est déjà inscrit dans cette partie.";
-        return RedirectToAction("Recapitulatif", new { gameId });
+        return Json(new { success = false, message = "Un joueur avec ce pseudo est déjà inscrit dans cette partie." });
     }
 
     var player = new PetitBacPlayer
@@ -393,5 +422,7 @@ public IActionResult GetPlayerAnswersByPseudo(string playerPseudo)
         return StatusCode(500, new { message = "Une erreur est survenue lors de la récupération des réponses." });
     }
 }
+
+
 }
 }
