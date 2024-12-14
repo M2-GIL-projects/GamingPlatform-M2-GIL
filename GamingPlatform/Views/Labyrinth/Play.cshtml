@@ -58,9 +58,13 @@
 
                 // Envoyer le labyrinthe au serveur
                 await connection.invoke("SaveLabyrinth", lobbyId, player1, player2, labyrinthJson);
-                alert(message);
+                // Réception du message "LabyrinthSaved" depuis le serveur
+                connection.on("LabyrinthSaved", message => {
+                    toggleSpinner(false); // Masquer le spinner
+                    alert(message);
                     // Rediriger vers la page de jeu
-                window.location.href = `/Game/LAB/Play/${lobbyId}`;
+                    window.location.href = `/Game/LAB/Play/${lobbyId}`;
+                });
             } catch (err) {
                 // Gérer les erreurs
                 toggleSpinner(false);
