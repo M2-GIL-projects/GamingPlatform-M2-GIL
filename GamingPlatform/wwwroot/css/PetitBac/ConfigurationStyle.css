@@ -1,0 +1,32 @@
+.categories-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espacement entre les éléments */
+}
+.d-flex {
+    display: flex;
+    flex-wrap: wrap; /* Permet le retour à la ligne si les colonnes dépassent la largeur */
+    gap: 15px; /* Espacement entre les colonnes */
+}
+
+.text-danger {
+    color: #ff0000;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 5px;
+    display: block;
+}
+
+.d-none {
+    display: none !important;
+}
+
+.error-border {
+    border: 2px solid #ff0000;
+    border-radius: 4px;
+}
+
+
+
+
+
