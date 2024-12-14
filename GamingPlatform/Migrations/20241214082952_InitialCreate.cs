@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GamingPlatform.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialM : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -61,21 +61,6 @@ namespace GamingPlatform.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Sentences",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Language = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Difficulty = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Sentences", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Lobby",
                 columns: table => new
                 {
@@ -98,6 +83,31 @@ namespace GamingPlatform.Migrations
                         principalTable: "Game",
                         principalColumn: "Code",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Labyrinth",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    LobbyId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    player1 = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    player2 = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    statep1 = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    statep2 = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Data = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Labyrinth", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Labyrinth_Lobby_LobbyId",
+                        column: x => x.LobbyId,
+                        principalTable: "Lobby",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -202,6 +212,11 @@ namespace GamingPlatform.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Labyrinth_LobbyId",
+                table: "Labyrinth",
+                column: "LobbyId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Lobby_GameCode",
                 table: "Lobby",
                 column: "GameCode");
@@ -232,6 +247,9 @@ namespace GamingPlatform.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Labyrinth");
+
+            migrationBuilder.DropTable(
                 name: "LobbyPlayer");
 
             migrationBuilder.DropTable(
@@ -242,9 +260,6 @@ namespace GamingPlatform.Migrations
 
             migrationBuilder.DropTable(
                 name: "Score");
-
-            migrationBuilder.DropTable(
-                name: "Sentences");
 
             migrationBuilder.DropTable(
                 name: "Player");

@@ -309,30 +309,6 @@ namespace GamingPlatform.Migrations
                     b.ToTable("Score");
                 });
 
-            modelBuilder.Entity("GamingPlatform.Models.Sentence", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Difficulty")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Sentences");
-                });
-
             modelBuilder.Entity("GamingPlatform.Models.Labyrinth", b =>
                 {
                     b.HasOne("GamingPlatform.Models.Lobby", "Lobby")
